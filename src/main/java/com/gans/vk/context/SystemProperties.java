@@ -16,7 +16,9 @@ public class SystemProperties {
         VK_HOST("vk.host"),
         VK_ID("vk.id"),
         VK_COOKIES("vk.cookies"),
-        VK_AUDIO_URL("vk.audioUrl");
+        VK_AUDIO_URL("vk.audioUrl"),
+
+        CRAWLER_ID_STASH("crawler.id.stash");
 
         private String key;
 
