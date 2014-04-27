@@ -4,8 +4,8 @@ import java.util.List;
 
 import com.gans.vk.context.SystemProperties;
 import static com.gans.vk.context.SystemProperties.Property.*;
-import com.gans.vk.data.IdDao;
-import com.gans.vk.data.impl.IdDaoImpl;
+import com.gans.vk.id.data.IdDao;
+import com.gans.vk.id.data.impl.IdDaoImpl;
 import com.gans.vk.id.service.IdService;
 
 public class IdServiceImpl implements IdService {

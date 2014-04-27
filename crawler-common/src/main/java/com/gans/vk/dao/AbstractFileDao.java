@@ -1,4 +1,4 @@
-package com.gans.vk.data.impl;
+package com.gans.vk.dao;
 
 import java.io.BufferedReader;
 import java.io.File;

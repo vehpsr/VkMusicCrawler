@@ -1,4 +1,4 @@
-package com.gans.vk.data;
+package com.gans.vk.id.data;
 
 import java.util.List;
 
