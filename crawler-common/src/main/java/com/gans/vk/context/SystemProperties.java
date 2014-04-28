@@ -15,10 +15,14 @@ public class SystemProperties {
         VK_LOGIN("vk.login"),
         VK_HOST("vk.host"),
         VK_ID("vk.id"),
-        VK_COOKIES("vk.cookies"),
         VK_AUDIO_URL("vk.audioUrl"),
 
-        CRAWLER_ID_STASH("crawler.id.stash");
+        VK_HEADER_COOKIES("vk.header.cookies"),
+        VK_HEADER_CONTENT_TYPE("vk.header.content-type"),
+        VK_HEADER_USER_AGENT("vk.header.user-agent"),
+
+        CRAWLER_ID_STASH("crawler.id.stash"),
+        CRAWLER_GROUP_STASH("crawler.group.stash");
 
         private String key;
 

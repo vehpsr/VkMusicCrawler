@@ -18,4 +18,9 @@ public class IdDaoImpl extends AbstractFileDao implements IdDao {
         return readFile(path);
     }
 
+    @Override
+    public List<String> getGroups(String path) {
+        return readFile(path);
+    }
+
 }

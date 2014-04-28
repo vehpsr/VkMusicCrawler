@@ -3,10 +3,16 @@ package com.gans.vk.id;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.gans.vk.id.service.IdService;
 import com.gans.vk.id.service.impl.IdServiceImpl;
 
 public class VkIdCrawler {
+
+    private static final Log LOG = LogFactory.getLog(VkIdCrawler.class);
 
     public static void main(String[] args) {
         new VkIdCrawler().start();
@@ -20,6 +26,13 @@ public class VkIdCrawler {
 
     private void start() {
         List<String> existingIds = _idService.getExistingIds();
-        Collections.sort(existingIds);
+
+        List<String> groups = _idService.getGroups();
+        if (CollectionUtils.isEmpty(groups)) {
+            LOG.info("No groups found for members ID discovery");
+            return;
+        }
+
+        List<String> newIds = _idService.discoverNewIds(groups, existingIds);
     }
 }
