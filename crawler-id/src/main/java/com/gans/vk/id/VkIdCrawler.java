@@ -1,14 +1,15 @@
 package com.gans.vk.id;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.gans.vk.data.GroupInfo;
 import com.gans.vk.id.service.IdService;
 import com.gans.vk.id.service.impl.IdServiceImpl;
+import com.gans.vk.utils.RestUtils;
 
 public class VkIdCrawler {
 
@@ -33,6 +34,12 @@ public class VkIdCrawler {
             return;
         }
 
-        List<String> newIds = _idService.discoverNewIds(groups, existingIds);
+        List<GroupInfo> groupInfos = _idService.getGroupInfos(groups);
+        for (GroupInfo groupInfo : groupInfos) {
+            List<String> newIds = _idService.getNewIds(groupInfo, existingIds);
+            _idService.addIds(newIds);
+            existingIds.addAll(newIds);
+            RestUtils.sleep();
+        }
     }
 }
