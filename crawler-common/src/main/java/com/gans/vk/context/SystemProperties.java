@@ -16,6 +16,8 @@ public class SystemProperties {
         VK_HOST("vk.host"),
         VK_ID("vk.id"),
         VK_AUDIO_URL("vk.audioUrl"),
+        VK_GROUP_MEMBERS_URL("vk.groupMembersUrl"),
+        VK_GROUP_MEMBERS_ENTITY_PATTERN("vk.groupMembersEntityPattern"),
 
         VK_HEADER_COOKIES("vk.header.cookies"),
         VK_HEADER_CONTENT_TYPE("vk.header.content-type"),

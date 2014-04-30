@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 import com.gans.vk.data.GroupInfo;
 import com.gans.vk.id.service.IdService;
 import com.gans.vk.id.service.impl.IdServiceImpl;
-import com.gans.vk.utils.RestUtils;
 
 public class VkIdCrawler {
 
@@ -26,8 +25,6 @@ public class VkIdCrawler {
     }
 
     private void start() {
-        List<String> existingIds = _idService.getExistingIds();
-
         List<String> groups = _idService.getGroups();
         if (CollectionUtils.isEmpty(groups)) {
             LOG.info("No groups found for members ID discovery");
@@ -36,10 +33,7 @@ public class VkIdCrawler {
 
         List<GroupInfo> groupInfos = _idService.getGroupInfos(groups);
         for (GroupInfo groupInfo : groupInfos) {
-            List<String> newIds = _idService.getNewIds(groupInfo, existingIds);
-            _idService.addIds(newIds);
-            existingIds.addAll(newIds);
-            RestUtils.sleep();
+            _idService.discoverNewIds(groupInfo);
         }
     }
 }

@@ -7,10 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 public class GroupInfo {
 
      private String _groupId;
-     private int _groupMembers;
+     private int _membersCount;
 
      public boolean isValid() {
-         return StringUtils.isNotEmpty(_groupId) && _groupMembers > 0;
+         return StringUtils.isNotEmpty(_groupId) && _membersCount > 0;
      }
 
      public String getGroupId() {
@@ -21,16 +21,16 @@ public class GroupInfo {
         _groupId = groupId;
     }
 
-    public int getGroupMembers() {
-        return _groupMembers;
+    public int getMembersCount() {
+        return _membersCount;
     }
 
-    public void setGroupMembers(int groupMembers) {
-        _groupMembers = groupMembers;
+    public void setMembersCount(int membersCount) {
+        _membersCount = membersCount;
     }
 
     @Override
      public String toString() {
-         return MessageFormat.format("[{0},{1}]", _groupId, _groupMembers);
+         return MessageFormat.format("[{0},{1}]", _groupId, _membersCount);
      }
 }
