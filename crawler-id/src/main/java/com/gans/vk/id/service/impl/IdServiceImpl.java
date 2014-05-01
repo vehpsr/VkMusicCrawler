@@ -4,12 +4,7 @@ import static com.gans.vk.context.SystemProperties.Property.CRAWLER_GROUP_STASH;
 import static com.gans.vk.context.SystemProperties.Property.CRAWLER_ID_STASH;
 import static com.gans.vk.context.SystemProperties.Property.VK_GROUP_MEMBERS_ENTITY_PATTERN;
 import static com.gans.vk.context.SystemProperties.Property.VK_GROUP_MEMBERS_URL;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_CONTENT_TYPE;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_COOKIES;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_USER_AGENT;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,25 +16,17 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.data.GroupInfo;
-import com.gans.vk.httpclient.HttpConnector;
+import com.gans.vk.httpclient.HttpVkConnector;
 import com.gans.vk.id.data.IdDao;
 import com.gans.vk.id.data.impl.IdDaoImpl;
 import com.gans.vk.id.service.IdService;
+import com.gans.vk.utils.HtmlUtils;
 import com.gans.vk.utils.RestUtils;
 
 public class IdServiceImpl implements IdService {
@@ -47,13 +34,13 @@ public class IdServiceImpl implements IdService {
     private static final Log LOG = LogFactory.getLog(IdServiceImpl.class);
 
     private IdDao _idDao;
-    private HttpClient _httpClient;
+    private HttpVkConnector _httpVkConnector;
 
     private static IdService _idService = new IdServiceImpl();
 
     private IdServiceImpl() {
         _idDao = IdDaoImpl.getInstance();
-        _httpClient = HttpConnector.getInstance();
+        _httpVkConnector = HttpVkConnector.getInstance();
     }
 
     public static IdService getInstance() {
@@ -87,41 +74,16 @@ public class IdServiceImpl implements IdService {
     }
 
     private GroupInfo getGroupInfo(String groupUrl) {
-        GroupInfo result = new GroupInfo();
-
-        HttpGet httpGet = new HttpGet(groupUrl);
-        httpGet.setHeader("Cookie", SystemProperties.get(VK_HEADER_COOKIES));
-        httpGet.setHeader("User-Agent", SystemProperties.get(VK_HEADER_USER_AGENT));
-        try {
-            HttpResponse response = _httpClient.execute(httpGet);
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                LOG.error(MessageFormat.format("Fail to reach {0}, response: {1}", groupUrl, response.getStatusLine().getStatusCode()));
-                return result;
-            }
-
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                String html = EntityUtils.toString(entity);
-                result = extractGroupInfoFromPage(html);
-            }
-        } catch (Exception e) {
-            if (e instanceof ClientProtocolException || e instanceof IOException) {
-                LOG.error(e.getMessage());
-            } else {
-                throw new IllegalStateException("System error", e);
-            }
+        String html = _httpVkConnector.get(groupUrl);
+        html = HtmlUtils.sanitizeHtml(html);
+        if (StringUtils.isEmpty(html)) {
+            return new GroupInfo();
+        } else {
+            return extractGroupInfoFromPage(html);
         }
-        return result;
     }
 
     private GroupInfo extractGroupInfoFromPage(String html) {
-        GroupInfo result = new GroupInfo();
-
-        if (StringUtils.isEmpty(html)) {
-            LOG.info("Parsing GroupInfo fails: invalid response");
-            return result;
-        }
-
         final String GROUP_INFO_CONTAINER_ID = "group_followers";
         final String GROUP_ID_CONTAINER_CLASS = "module_header";
         final String GROUP_MEMBERS_COUNT_CONTAINER_CLASS = "p_header_bottom";
@@ -130,14 +92,16 @@ public class IdServiceImpl implements IdService {
         Document doc = Jsoup.parse(html);
         if (doc.getElementById(LOGIN_FORM_ID) != null) {
             LOG.info("Parsing GroupInfo fails: user must be login into system to continue");
-            return result;
+            return new GroupInfo();
         }
 
         Element infoContainer = doc.getElementById(GROUP_INFO_CONTAINER_ID);
         if (infoContainer == null) {
             LOG.info(MessageFormat.format("Parsing GroupInfo fails: unexpected HTML response. Element wiht id {0} not found", GROUP_INFO_CONTAINER_ID));
-            return result;
+            return new GroupInfo();
         }
+
+        GroupInfo result = new GroupInfo();
 
         // group id
         for (Element element : infoContainer.getElementsByClass(GROUP_ID_CONTAINER_CLASS)) {
@@ -173,19 +137,19 @@ public class IdServiceImpl implements IdService {
 
     @Override
     public void discoverNewIds(GroupInfo groupInfo) {
+        LOG.info(MessageFormat.format("Collect members id from group: {0}", groupInfo.toString()));
+
         List<String> existingIds = getExistingIds();
         Collections.sort(existingIds);
 
         int offset = 0;
         int peopleOnPage = 60;
         while (offset < groupInfo.getMembersCount()) {
-            LOG.info(MessageFormat.format("Collect members id for group: {0}", groupInfo.toString()));
             List<String> rawUrls = getGroupMembersUrls(groupInfo.getGroupId(), offset);
             for (String rawUrl : rawUrls) {
 
             }
             offset += peopleOnPage;
-            break;
         }
     }
 
@@ -193,56 +157,24 @@ public class IdServiceImpl implements IdService {
         final String GROUP_MEMBER_CONTAINER_CLASS = "fans_fan_name";
         final String GROUP_MEMBER_LINK_ELEMENT_SELECTOR = "a.fans_fan_lnk";
 
+        String url = SystemProperties.get(VK_GROUP_MEMBERS_URL);
+        String postEntity = MessageFormat.format(SystemProperties.get(VK_GROUP_MEMBERS_ENTITY_PATTERN), offset, groupId);
+
+        String html = _httpVkConnector.post(url, postEntity);
+        html = HtmlUtils.sanitizeHtml(html);
+        if (StringUtils.isEmpty(html)) {
+            return Collections.emptyList();
+        }
+
         List<String> rawUrls = new LinkedList<String>();
-
-        HttpPost httpPost = new HttpPost(SystemProperties.get(VK_GROUP_MEMBERS_URL));
-        httpPost.setHeader("Cookie", SystemProperties.get(VK_HEADER_COOKIES));
-        httpPost.setHeader("User-Agent", SystemProperties.get(VK_HEADER_USER_AGENT));
-        httpPost.setHeader("Content-type", SystemProperties.get(VK_HEADER_CONTENT_TYPE));
-
-        try {
-            String postEntity = MessageFormat.format(SystemProperties.get(VK_GROUP_MEMBERS_ENTITY_PATTERN), offset, groupId);
-            httpPost.setEntity(new StringEntity(postEntity));
-
-            HttpResponse response = _httpClient.execute(httpPost);
-            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                LOG.error(MessageFormat.format("Fail to connect with response code: {0}", response.getStatusLine().getStatusCode()));
-                return Collections.emptyList();
-            }
-
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                String html = EntityUtils.toString(entity);
-                html = sanitizeHtml(html);
-
-                Document doc = Jsoup.parse(html);
-                for (Element element : doc.getElementsByClass(GROUP_MEMBER_CONTAINER_CLASS)) {
-                    String href = element.select(GROUP_MEMBER_LINK_ELEMENT_SELECTOR).iterator().next().attr("href");
-                    if (StringUtils.isNotEmpty(href)) {
-                        rawUrls.add(href);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            if (e instanceof UnsupportedEncodingException || e instanceof ClientProtocolException || e instanceof IOException) {
-                LOG.error(e.getMessage());
-            } else {
-                throw new IllegalStateException("System error", e);
+        Document doc = Jsoup.parse(html);
+        for (Element element : doc.getElementsByClass(GROUP_MEMBER_CONTAINER_CLASS)) {
+            String href = element.select(GROUP_MEMBER_LINK_ELEMENT_SELECTOR).iterator().next().attr("href");
+            if (StringUtils.isNotEmpty(href)) {
+                rawUrls.add(href);
             }
         }
         return rawUrls;
-    }
-
-    private String sanitizeHtml(String html) {
-        // TODO rewrite in regex
-        String htmlComponentStartElement = "<div";
-        String htmlComponentEndElement = "</div>";
-        int start = html.indexOf(htmlComponentStartElement);
-        int end = html.lastIndexOf(htmlComponentEndElement);
-        if (start < 0 || end < 0) {
-            return "<div/>";
-        }
-        return html.substring(start, end + htmlComponentEndElement.length());
     }
 
     @Override
