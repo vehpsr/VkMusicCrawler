@@ -13,13 +13,13 @@ public class SystemProperties {
     public enum Property {
         VK_PASS("vk.pass"),
         VK_LOGIN("vk.login"),
-        VK_HOST("vk.host"),
         VK_ID("vk.id"),
+        VK_AUTH_LOGIN_URL_PATTERN("vk.auth.loginUrlPattern"),
+        VK_AUTH_COOKIE_DOMAIN("vk.auth.cookieDomain"),
         VK_AUDIO_URL("vk.audioUrl"),
         VK_GROUP_MEMBERS_URL("vk.groupMembersUrl"),
         VK_GROUP_MEMBERS_ENTITY_PATTERN("vk.groupMembersEntityPattern"),
 
-        VK_HEADER_COOKIES("vk.header.cookies"),
         VK_HEADER_CONTENT_TYPE("vk.header.content-type"),
         VK_HEADER_USER_AGENT("vk.header.user-agent"),
 
@@ -34,7 +34,6 @@ public class SystemProperties {
     }
 
     public enum NumericProperty {
-        VK_PORT("vk.port"),
         CRAWLER_DDOS_TIMEOUT("crawler.ddosTimeout");
 
         private String key;

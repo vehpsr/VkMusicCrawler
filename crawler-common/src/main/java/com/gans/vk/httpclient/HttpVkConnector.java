@@ -1,34 +1,25 @@
 package com.gans.vk.httpclient;
 
-import static com.gans.vk.context.SystemProperties.NumericProperty.VK_PORT;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_CONTENT_TYPE;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_COOKIES;
-import static com.gans.vk.context.SystemProperties.Property.VK_HEADER_USER_AGENT;
-import static com.gans.vk.context.SystemProperties.Property.VK_HOST;
-import static com.gans.vk.context.SystemProperties.Property.VK_LOGIN;
-import static com.gans.vk.context.SystemProperties.Property.VK_PASS;
+import static com.gans.vk.context.SystemProperties.Property.*;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.security.*;
 import java.text.MessageFormat;
+import java.util.List;
+
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
+import org.apache.http.conn.ssl.*;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.*;
 import org.apache.http.util.EntityUtils;
 
 import com.gans.vk.context.SystemProperties;
@@ -36,8 +27,9 @@ import com.gans.vk.context.SystemProperties;
 public class HttpVkConnector {
 
     private static final Log LOG = LogFactory.getLog(HttpVkConnector.class);
-    private static HttpClient _httpClient = getHttpClient();
     private static HttpVkConnector _instance = new HttpVkConnector();
+    private CloseableHttpClient _httpClient = HttpClients.createDefault();
+    private String _cookie = null;
 
     private HttpVkConnector(){}
 
@@ -45,30 +37,11 @@ public class HttpVkConnector {
         return _instance;
     }
 
-    private static HttpClient getHttpClient() {
-        String login = SystemProperties.get(VK_LOGIN);
-        String pass = SystemProperties.get(VK_PASS);
-        String host = SystemProperties.get(VK_HOST);
-        int port = SystemProperties.get(VK_PORT, 80);
-
-        HttpClientBuilder httpClient = HttpClientBuilder.create();
-        CredentialsProvider provider = new BasicCredentialsProvider();
-        provider.setCredentials(
-                new AuthScope(host, port),
-                new UsernamePasswordCredentials(login, pass)
-            );
-        httpClient.setDefaultCredentialsProvider(provider);
-
-        return httpClient.build();
-    }
-
     public String get(String url) {
         if (StringUtils.isEmpty(url)) {
             return "";
         }
         HttpGet httpGet = new HttpGet(url);
-        httpGet.setHeader("Cookie", SystemProperties.get(VK_HEADER_COOKIES));
-        httpGet.setHeader("User-Agent", SystemProperties.get(VK_HEADER_USER_AGENT));
         return executeHttpMethod(httpGet);
     }
 
@@ -77,9 +50,6 @@ public class HttpVkConnector {
             return "";
         }
         HttpPost httpPost = new HttpPost(url);
-        httpPost.setHeader("Cookie", SystemProperties.get(VK_HEADER_COOKIES));
-        httpPost.setHeader("User-Agent", SystemProperties.get(VK_HEADER_USER_AGENT));
-        httpPost.setHeader("Content-type", SystemProperties.get(VK_HEADER_CONTENT_TYPE));
         try {
             httpPost.setEntity(new StringEntity(postEntity));
         } catch (UnsupportedEncodingException e) {
@@ -90,13 +60,15 @@ public class HttpVkConnector {
     }
 
     private String executeHttpMethod(HttpUriRequest method) {
+        setHeaders(method);
+
+        CloseableHttpResponse response = null;
         try {
-            HttpResponse response = _httpClient.execute(method);
+            response = _httpClient.execute(method);
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                 LOG.error(MessageFormat.format("Fail to reach {0}, response: {1}", method.getURI(), response.getStatusLine().getStatusCode()));
                 return "";
             }
-
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 return EntityUtils.toString(entity);
@@ -107,7 +79,98 @@ public class HttpVkConnector {
             } else {
                 throw new IllegalStateException("System error", e);
             }
+        } finally {
+            if (response != null) {
+                try {
+                    response.close();
+                } catch (IOException e) {
+                    throw new IllegalStateException("System error", e);
+                }
+            }
         }
         return "";
+    }
+
+    private void setHeaders(HttpUriRequest method) {
+        if (StringUtils.isEmpty(_cookie)) {
+            _cookie = getAuthenticationCookie();
+        }
+
+        method.setHeader("Cookie", _cookie);
+        method.setHeader(HttpHeaders.USER_AGENT, SystemProperties.get(VK_HEADER_USER_AGENT));
+        method.setHeader(HttpHeaders.CONTENT_TYPE, SystemProperties.get(VK_HEADER_CONTENT_TYPE));
+    }
+
+    private String getAuthenticationCookie() {
+        String login = SystemProperties.get(VK_LOGIN);
+        String pass = SystemProperties.get(VK_PASS);
+
+        CloseableHttpClient sslHttpClient = null;
+        CloseableHttpClient httpClient = null;
+        try {
+            BasicCookieStore cookieStore = new BasicCookieStore();
+
+            SSLContext sslContext = new SSLContextBuilder()
+                    .loadTrustMaterial(null, new TrustSelfSignedStrategy())
+                    .build();
+            sslHttpClient = HttpClients
+                    .custom()
+                    .setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext))
+                    .setDefaultCookieStore(cookieStore)
+                    .build();
+
+            String authUrl = MessageFormat.format(SystemProperties.get(VK_AUTH_LOGIN_URL_PATTERN), login, pass);
+            HttpPost httpPost = new HttpPost(authUrl);
+            HttpResponse response = sslHttpClient.execute(httpPost);
+
+            if (response.getStatusLine().getStatusCode() != HttpStatus.SC_MOVED_TEMPORARILY) {
+                throw new IllegalStateException(MessageFormat.format("Expected redirect after successfull login, but got: {0}", response.getStatusLine().getStatusCode()));
+            }
+
+            String redirectUrl = "";
+            for (Header location : response.getHeaders(HttpHeaders.LOCATION)) {
+                redirectUrl = location.getValue();
+            }
+
+            CloseableHttpClient httpclient = HttpClients
+                    .custom()
+                    .setDefaultCookieStore(cookieStore)
+                    .build();
+
+            httpclient.execute(new HttpGet(redirectUrl));
+
+            StringBuilder result = new StringBuilder();
+            String vkDomain = SystemProperties.get(VK_AUTH_COOKIE_DOMAIN);
+            List<Cookie> cookies = cookieStore.getCookies();
+            for (Cookie cookie : cookies) {
+                if (cookie.getDomain().equals(vkDomain)) {
+                    result.append(cookie.getName());
+                    result.append("=");
+                    result.append(cookie.getValue());
+                    result.append(";");
+                }
+            }
+            return result.toString();
+        } catch (Exception e) {
+            if (e instanceof NoSuchAlgorithmException ||
+                    e instanceof KeyStoreException ||
+                    e instanceof KeyManagementException ||
+                    e instanceof ClientProtocolException ||
+                    e instanceof IOException) {
+                LOG.error(MessageFormat.format("VK authentication fails with reason: {0}", e.getMessage()));
+            }
+            throw new IllegalStateException("System error", e);
+        } finally {
+            try {
+                if (sslHttpClient != null) {
+                    sslHttpClient.close();
+                }
+                if (httpClient != null) {
+                    httpClient.close();
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("System error", e);
+            }
+        }
     }
 }
