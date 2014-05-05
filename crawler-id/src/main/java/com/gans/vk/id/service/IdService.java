@@ -12,7 +12,7 @@ public interface IdService {
 
     List<GroupInfo> getGroupInfos(List<String> groups);
 
-    void discoverNewIds(GroupInfo groupInfo);
+    List<String> discoverNewIds(GroupInfo groupInfo);
 
     void addIds(List<String> newIds);
 }

@@ -1,15 +1,10 @@
 package com.gans.vk.id.service.impl;
 
-import static com.gans.vk.context.SystemProperties.Property.CRAWLER_GROUP_STASH;
-import static com.gans.vk.context.SystemProperties.Property.CRAWLER_ID_STASH;
-import static com.gans.vk.context.SystemProperties.Property.VK_GROUP_MEMBERS_ENTITY_PATTERN;
-import static com.gans.vk.context.SystemProperties.Property.VK_GROUP_MEMBERS_URL;
+import static com.gans.vk.context.SystemProperties.NumericProperty.CRAWLER_ID_MIN_AUDIO_LIB_SIZE;
+import static com.gans.vk.context.SystemProperties.Property.*;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +18,10 @@ import org.jsoup.nodes.Element;
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.data.GroupInfo;
 import com.gans.vk.httpclient.HttpVkConnector;
-import com.gans.vk.id.data.IdDao;
-import com.gans.vk.id.data.impl.IdDaoImpl;
+import com.gans.vk.id.dao.IdDao;
+import com.gans.vk.id.dao.impl.IdDaoImpl;
 import com.gans.vk.id.service.IdService;
+import com.gans.vk.id.statistic.GroupStatistics;
 import com.gans.vk.utils.HtmlUtils;
 import com.gans.vk.utils.RestUtils;
 
@@ -111,7 +107,7 @@ public class IdServiceImpl implements IdService {
 
         // group members count
         for (Element element : infoContainer.getElementsByClass(GROUP_MEMBERS_COUNT_CONTAINER_CLASS)) {
-            int membersCount = parseGroupMembersCount(element.text());
+            int membersCount = extractNumericValue(element.text());
             result.setMembersCount(membersCount);
         }
 
@@ -126,7 +122,7 @@ public class IdServiceImpl implements IdService {
         return "";
     }
 
-    private int parseGroupMembersCount(String text) {
+    private int extractNumericValue(String text) {
         String count = text.replaceAll("\\D", "");
         try {
             return Integer.parseInt(count);
@@ -136,21 +132,40 @@ public class IdServiceImpl implements IdService {
     }
 
     @Override
-    public void discoverNewIds(GroupInfo groupInfo) {
+    public List<String> discoverNewIds(GroupInfo groupInfo) {
         LOG.info(MessageFormat.format("Collect members id from group: {0}", groupInfo.toString()));
 
-        List<String> existingIds = getExistingIds();
-        Collections.sort(existingIds);
+        List<String> membersUrlsBucket = new ArrayList<String>();
 
         int offset = 0;
-        int peopleOnPage = 60;
+        final int PEOPLE_ON_PAGE = 60;
+        final int PEOPLE_ON_FIRST_PAGE = 120;
         while (offset < groupInfo.getMembersCount()) {
-            List<String> rawUrls = getGroupMembersUrls(groupInfo.getGroupId(), offset);
-            for (String rawUrl : rawUrls) {
+            List<String> membersUrls = getGroupMembersUrls(groupInfo.getGroupId(), offset);
+            membersUrlsBucket.addAll(membersUrls);
 
+            if (offset > 0) {
+                offset += PEOPLE_ON_PAGE;
+            } else if (offset == 0) {
+                offset += PEOPLE_ON_FIRST_PAGE;
             }
-            offset += peopleOnPage;
+
+            RestUtils.sleep();
         }
+
+        List<String> ids = new ArrayList<String>();
+        GroupStatistics groupStatistics = new GroupStatistics(groupInfo);
+        for (String memberUrl : membersUrlsBucket) {
+            String id = lookupMemberId(memberUrl, groupStatistics);
+            if (StringUtils.isNotEmpty(id)) {
+                ids.add(id);
+            }
+            RestUtils.sleep();
+        }
+
+        LOG.info(groupStatistics.getGroupStatistics());
+
+        return ids;
     }
 
     private List<String> getGroupMembersUrls(String groupId, int offset) {
@@ -166,15 +181,63 @@ public class IdServiceImpl implements IdService {
             return Collections.emptyList();
         }
 
-        List<String> rawUrls = new LinkedList<String>();
+        List<String> membersUrls = new LinkedList<String>();
         Document doc = Jsoup.parse(html);
         for (Element element : doc.getElementsByClass(GROUP_MEMBER_CONTAINER_CLASS)) {
             String href = element.select(GROUP_MEMBER_LINK_ELEMENT_SELECTOR).iterator().next().attr("href");
             if (StringUtils.isNotEmpty(href)) {
-                rawUrls.add(href);
+                membersUrls.add(href);
             }
         }
-        return rawUrls;
+        return membersUrls;
+    }
+
+    private String lookupMemberId(String memberUrl, GroupStatistics groupStatistics) {
+        LOG.trace(MessageFormat.format("Discover member id by url: {0}", memberUrl));
+
+        if (StringUtils.isEmpty(memberUrl)) {
+            groupStatistics.parserError();
+            return "";
+        }
+
+        final String AUDIO_COMPONENT_ID = "profile_audios";
+        final String ID_LINK_SELECTOR = "a.module_header";
+        final String AUDIO_COUNT_COMPONENT_CLASS = "p_header_bottom";
+
+        String domain = SystemProperties.get(VK_DOMAIN, "vk.com/");
+        String url = memberUrl.startsWith("/") ? domain + memberUrl.substring(1) : domain + memberUrl;
+        String html = _httpVkConnector.get(url);
+        html = HtmlUtils.sanitizeHtml(html);
+
+        Document doc = Jsoup.parse(html);
+        Element audios = doc.getElementById(AUDIO_COMPONENT_ID);
+        if (audios == null) {
+            groupStatistics.closedPage();
+            return "";
+        }
+
+        for (Element element : audios.getElementsByClass(AUDIO_COUNT_COMPONENT_CLASS)) {
+            String audioSize = element.text();
+            int size = extractNumericValue(audioSize);
+            if (size < SystemProperties.get(CRAWLER_ID_MIN_AUDIO_LIB_SIZE)) {
+                groupStatistics.notEnoughAudio();
+                return "";
+            }
+        }
+
+        String href = audios.select(ID_LINK_SELECTOR).attr("href");
+        if (StringUtils.isEmpty(href)) {
+            groupStatistics.parserError();
+            return "";
+        }
+
+        String id = href.replaceAll("\\D", "");
+        if (StringUtils.isEmpty(id)) {
+            groupStatistics.parserError();
+            return "";
+        }
+
+        return id;
     }
 
     @Override

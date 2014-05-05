@@ -1,9 +1,9 @@
-package com.gans.vk.id.data.impl;
+package com.gans.vk.id.dao.impl;
 
 import java.util.List;
 
 import com.gans.vk.dao.AbstractFileDao;
-import com.gans.vk.id.data.IdDao;
+import com.gans.vk.id.dao.IdDao;
 
 public class IdDaoImpl extends AbstractFileDao implements IdDao {
 

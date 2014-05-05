@@ -14,6 +14,7 @@ public class SystemProperties {
         VK_PASS("vk.pass"),
         VK_LOGIN("vk.login"),
         VK_ID("vk.id"),
+        VK_DOMAIN("vk.domain"),
         VK_AUTH_LOGIN_URL_PATTERN("vk.auth.loginUrlPattern"),
         VK_AUTH_COOKIE_DOMAIN("vk.auth.cookieDomain"),
         VK_AUDIO_URL("vk.audioUrl"),
@@ -34,7 +35,8 @@ public class SystemProperties {
     }
 
     public enum NumericProperty {
-        CRAWLER_DDOS_TIMEOUT("crawler.ddosTimeout");
+        CRAWLER_DDOS_TIMEOUT("crawler.ddosTimeout"),
+        CRAWLER_ID_MIN_AUDIO_LIB_SIZE("crawler.id.minAudioLibrarySize");
 
         private String key;
 

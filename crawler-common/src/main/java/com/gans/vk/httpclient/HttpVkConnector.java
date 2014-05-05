@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.*;
+import org.apache.http.annotation.NotThreadSafe;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.*;
 import org.apache.http.conn.ssl.*;
@@ -24,6 +25,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.gans.vk.context.SystemProperties;
 
+@NotThreadSafe
 public class HttpVkConnector {
 
     private static final Log LOG = LogFactory.getLog(HttpVkConnector.class);
