@@ -22,7 +22,11 @@
     <logger name="com.gans.vk">
         <level value="INFO"/>
     </logger>
-    
+
+    <logger name="com.gans.vk.id.service.impl">
+        <level value="DEBUG"/>
+    </logger>
+
     <root>
         <level value="WARN"/>
         <appender-ref ref="CONSOLE"/>

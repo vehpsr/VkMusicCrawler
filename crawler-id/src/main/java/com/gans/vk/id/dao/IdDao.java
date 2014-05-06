@@ -1,10 +1,13 @@
 package com.gans.vk.id.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface IdDao {
 
-    List<String> getAllIds(String path);
+    List<String> getAllIds();
 
-    List<String> getGroups(String path);
+    List<String> getGroups();
+
+    void saveIds(Collection<String> idsToSave);
 }

@@ -33,7 +33,8 @@ public class VkIdCrawler {
 
         List<GroupInfo> groupInfos = _idService.getGroupInfos(groups);
         for (GroupInfo groupInfo : groupInfos) {
-            List<String> ids = _idService.discoverNewIds(groupInfo);
+            List<String> membersId = _idService.discoverGroupMembersId(groupInfo);
+            _idService.saveNewIds(membersId);
         }
     }
 }

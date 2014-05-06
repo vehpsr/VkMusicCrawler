@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,14 +46,12 @@ public class IdServiceImpl implements IdService {
 
     @Override
     public List<String> getExistingIds() {
-        String path = SystemProperties.get(CRAWLER_ID_STASH);
-        return _idDao.getAllIds(path);
+        return _idDao.getAllIds();
     }
 
     @Override
     public List<String> getGroups() {
-        String path = SystemProperties.get(CRAWLER_GROUP_STASH);
-        return _idDao.getGroups(path);
+        return _idDao.getGroups();
     }
 
     @Override
@@ -132,24 +131,17 @@ public class IdServiceImpl implements IdService {
     }
 
     @Override
-    public List<String> discoverNewIds(GroupInfo groupInfo) {
+    public List<String> discoverGroupMembersId(GroupInfo groupInfo) {
         LOG.info(MessageFormat.format("Collect members id from group: {0}", groupInfo.toString()));
 
         List<String> membersUrlsBucket = new ArrayList<String>();
 
         int offset = 0;
         final int PEOPLE_ON_PAGE = 60;
-        final int PEOPLE_ON_FIRST_PAGE = 120;
         while (offset < groupInfo.getMembersCount()) {
             List<String> membersUrls = getGroupMembersUrls(groupInfo.getGroupId(), offset);
             membersUrlsBucket.addAll(membersUrls);
-
-            if (offset > 0) {
-                offset += PEOPLE_ON_PAGE;
-            } else if (offset == 0) {
-                offset += PEOPLE_ON_FIRST_PAGE;
-            }
-
+            offset += PEOPLE_ON_PAGE;
             RestUtils.sleep();
         }
 
@@ -193,7 +185,7 @@ public class IdServiceImpl implements IdService {
     }
 
     private String lookupMemberId(String memberUrl, GroupStatistics groupStatistics) {
-        LOG.trace(MessageFormat.format("Discover member id by url: {0}", memberUrl));
+        LOG.debug(MessageFormat.format("Discover member id by url: {0}", memberUrl));
 
         if (StringUtils.isEmpty(memberUrl)) {
             groupStatistics.parserError();
@@ -209,7 +201,10 @@ public class IdServiceImpl implements IdService {
         String html = _httpVkConnector.get(url);
         html = HtmlUtils.sanitizeHtml(html);
 
+        LOG.trace(MessageFormat.format("VK response:\n{0}", html));
+
         Document doc = Jsoup.parse(html);
+        // TODO check for DDOS error
         Element audios = doc.getElementById(AUDIO_COMPONENT_ID);
         if (audios == null) {
             groupStatistics.closedPage();
@@ -241,7 +236,11 @@ public class IdServiceImpl implements IdService {
     }
 
     @Override
-    public void addIds(List<String> newIds) {
-        // TODO Auto-generated method stub
+    @SuppressWarnings("unchecked")
+    public void saveNewIds(List<String> newIds) {
+        List<String> existingIds = getExistingIds();
+        Collection<String> idsToSave = CollectionUtils.subtract(newIds, existingIds);
+        _idDao.saveIds(idsToSave);
     }
+
 }

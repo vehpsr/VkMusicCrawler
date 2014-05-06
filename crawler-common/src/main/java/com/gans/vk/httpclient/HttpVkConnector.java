@@ -24,6 +24,7 @@ import org.apache.http.impl.client.*;
 import org.apache.http.util.EntityUtils;
 
 import com.gans.vk.context.SystemProperties;
+import com.gans.vk.utils.RestUtils;
 
 @NotThreadSafe
 public class HttpVkConnector {
@@ -152,6 +153,7 @@ public class HttpVkConnector {
                     result.append(";");
                 }
             }
+            RestUtils.sleep();
             return result.toString();
         } catch (Exception e) {
             if (e instanceof NoSuchAlgorithmException ||

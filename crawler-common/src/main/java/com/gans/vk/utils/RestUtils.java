@@ -8,7 +8,7 @@ public class RestUtils {
 
     public static void sleep() {
         try {
-            Thread.sleep((long)(SystemProperties.get(CRAWLER_DDOS_TIMEOUT) * Math.random()));
+            Thread.sleep((long)(1000 + SystemProperties.get(CRAWLER_DDOS_TIMEOUT) * Math.random()));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

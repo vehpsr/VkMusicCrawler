@@ -1,14 +1,10 @@
 package com.gans.vk.dao;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class AbstractFileDao {
@@ -51,5 +47,27 @@ public class AbstractFileDao {
             file.createNewFile();
         }
         return file;
+    }
+
+    public void appendToFile(String path, Collection<String> lines) {
+        if (CollectionUtils.isEmpty(lines) || StringUtils.isEmpty(path)) {
+            return;
+        }
+
+        PrintWriter pw = null;
+        try {
+            File file = createIfDontExist(path);
+            pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
+
+            for (String line : lines) {
+                pw.println(line);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException(MessageFormat.format("Exception while writing to file: {0}", path), e);
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
+        }
     }
 }
