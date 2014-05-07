@@ -8,6 +8,7 @@ public class GroupStatistics {
     private int _closedAudioPagesCount = 0;
     private int _notEnoughAudioCount = 0;
     private int _parseIdErrorCount = 0;
+    private int _ddosCount = 0;
 
     public GroupStatistics(GroupInfo groupInfo) {
         _groupInfo = groupInfo;
@@ -25,6 +26,10 @@ public class GroupStatistics {
         _parseIdErrorCount++;
     }
 
+    public void ddosBlock() {
+        _ddosCount++;
+    }
+
     public String getGroupStatistics() {
         if (_groupInfo == null) {
             return "Invalid group: null";
@@ -33,6 +38,7 @@ public class GroupStatistics {
         StringBuilder result = new StringBuilder();
         result.append("In group: ");
         result.append(_groupInfo.toString()).append("\n");
+        result.append(" - DDOS blocks: ").append(_ddosCount).append("\n");
         result.append(" - closed accounts: ").append(_closedAudioPagesCount).append("\n");
         result.append(" - not enough audio: ").append(_notEnoughAudioCount).append("\n");
         result.append(" - parsing failures: ").append(_parseIdErrorCount);
@@ -43,4 +49,5 @@ public class GroupStatistics {
     public String toString() {
         return getGroupStatistics();
     }
+
 }

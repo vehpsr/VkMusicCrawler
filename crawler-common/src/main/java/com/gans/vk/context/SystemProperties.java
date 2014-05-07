@@ -24,6 +24,7 @@ public class SystemProperties {
         VK_HEADER_CONTENT_TYPE("vk.header.content-type"),
         VK_HEADER_USER_AGENT("vk.header.user-agent"),
 
+        CRAWLER_DEBUG("crawler.debug"),
         CRAWLER_ID_STASH("crawler.id.stash"),
         CRAWLER_GROUP_STASH("crawler.group.stash");
 
@@ -35,7 +36,8 @@ public class SystemProperties {
     }
 
     public enum NumericProperty {
-        CRAWLER_DDOS_TIMEOUT("crawler.ddosTimeout"),
+        CRAWLER_DDOS_TIMEOUT_MIN("crawler.ddosTimeout.min"),
+        CRAWLER_DDOS_TIMEOUT_RAND("crawler.ddosTimeout.randomization"),
         CRAWLER_ID_MIN_AUDIO_LIB_SIZE("crawler.id.minAudioLibrarySize");
 
         private String key;
@@ -79,5 +81,9 @@ public class SystemProperties {
 
     public static int get(NumericProperty prop, int defaultValue) {
         return Integer.parseInt(_properties.getProperty(prop.key, String.valueOf(defaultValue)));
+    }
+
+    public static boolean debug() {
+        return !get(Property.CRAWLER_DEBUG, "").isEmpty();
     }
 }

@@ -15,6 +15,7 @@ import org.apache.commons.logging.LogFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.data.GroupInfo;
@@ -32,6 +33,7 @@ public class IdServiceImpl implements IdService {
 
     private IdDao _idDao;
     private HttpVkConnector _httpVkConnector;
+    private boolean _debug = SystemProperties.debug();
 
     private static IdService _idService = new IdServiceImpl();
 
@@ -64,6 +66,8 @@ public class IdServiceImpl implements IdService {
                 groupInfos.add(groupInfo);
             }
             RestUtils.sleep();
+
+            if (_debug) break;
         }
         return groupInfos;
     }
@@ -143,6 +147,8 @@ public class IdServiceImpl implements IdService {
             membersUrlsBucket.addAll(membersUrls);
             offset += PEOPLE_ON_PAGE;
             RestUtils.sleep();
+
+            if (_debug) break;
         }
 
         List<String> ids = new ArrayList<String>();
@@ -195,6 +201,8 @@ public class IdServiceImpl implements IdService {
         final String AUDIO_COMPONENT_ID = "profile_audios";
         final String ID_LINK_SELECTOR = "a.module_header";
         final String AUDIO_COUNT_COMPONENT_CLASS = "p_header_bottom";
+        final String ERROR_BACK_BTN_ID = "msg_back_button";
+        final String ERROR_MSG_CONTAINER_CLASS = "body";
 
         String domain = SystemProperties.get(VK_DOMAIN, "vk.com/");
         String url = memberUrl.startsWith("/") ? domain + memberUrl.substring(1) : domain + memberUrl;
@@ -204,7 +212,16 @@ public class IdServiceImpl implements IdService {
         LOG.trace(MessageFormat.format("VK response:\n{0}", html));
 
         Document doc = Jsoup.parse(html);
-        // TODO check for DDOS error
+
+        Element returnBtn = doc.getElementById(ERROR_BACK_BTN_ID);
+        Elements errorMsgContainer = doc.getElementsByClass(ERROR_MSG_CONTAINER_CLASS);
+        if (returnBtn != null && !errorMsgContainer.isEmpty()) {
+            LOG.warn(MessageFormat.format("Request was blocked. Reason: {0}\n{1}", doc.title(), errorMsgContainer.get(0).text()));
+            groupStatistics.ddosBlock();
+            RestUtils.sleep("2x");
+            return "";
+        }
+
         Element audios = doc.getElementById(AUDIO_COMPONENT_ID);
         if (audios == null) {
             groupStatistics.closedPage();

@@ -6,6 +6,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.gans.vk.context.SystemProperties;
 import com.gans.vk.data.GroupInfo;
 import com.gans.vk.id.service.IdService;
 import com.gans.vk.id.service.impl.IdServiceImpl;
@@ -15,6 +16,7 @@ public class VkIdCrawler {
     private static final Log LOG = LogFactory.getLog(VkIdCrawler.class);
 
     public static void main(String[] args) {
+        LOG.info("debug: " + SystemProperties.debug());
         new VkIdCrawler().start();
     }
 
