@@ -25,8 +25,10 @@ public class SystemProperties {
         VK_HEADER_USER_AGENT("vk.header.user-agent"),
 
         CRAWLER_DEBUG("crawler.debug"),
+
         CRAWLER_ID_STASH("crawler.id.stash"),
-        CRAWLER_GROUP_STASH("crawler.group.stash");
+        CRAWLER_GROUP_STASH("crawler.group.stash"),
+        CRAWLER_AUDIO_STASH("crawler.audio.stash");
 
         private String key;
 
@@ -84,6 +86,7 @@ public class SystemProperties {
     }
 
     public static boolean debug() {
-        return !get(Property.CRAWLER_DEBUG, "").isEmpty();
+        String debug = get(Property.CRAWLER_DEBUG, "false");
+        return new Boolean(debug);
     }
 }

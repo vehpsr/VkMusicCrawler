@@ -6,10 +6,18 @@ import java.util.*;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class AbstractFileDao {
 
-    protected List<String> readFile(String path) {
+    private static final Log LOG = LogFactory.getLog(AbstractFileDao.class);
+
+    public enum ReadMode {
+        UNIQUE
+    }
+
+    protected List<String> readFile(String path, ReadMode readMode) {
         if (StringUtils.isEmpty(path)) {
             return Collections.emptyList();
         }
@@ -36,17 +44,28 @@ public class AbstractFileDao {
                 }
             }
         }
+
+        if (ReadMode.UNIQUE.equals(readMode)) {
+            return getUniqueEntries(result);
+        }
         return result;
     }
 
     private File createIfDontExist(String path) throws IOException {
-        File file = null;
-        file = new File(path);
+        File file = new File(path);
         file.getParentFile().mkdirs();
         if (!file.exists()) {
             file.createNewFile();
         }
         return file;
+    }
+
+    private List<String> getUniqueEntries(List<String> list) {
+        Set<String> set = new HashSet<String>(list);
+        if (set.size() != list.size()) {
+            LOG.warn(MessageFormat.format("Stash contains duplicate entry. Reduce from {0} to {1}",list.size(), set.size()));
+        }
+        return new LinkedList<String>(set);
     }
 
     public void appendToFile(String path, Collection<String> lines) {
@@ -56,7 +75,7 @@ public class AbstractFileDao {
 
         PrintWriter pw = null;
         try {
-            File file = createIfDontExist(path);
+            File file = createFileIfDontExist(path);
             pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
 
             for (String line : lines) {
@@ -70,4 +89,19 @@ public class AbstractFileDao {
             }
         }
     }
+
+    public List<String> getAllFileNamesInDirectory(String path) {
+        File directory = new File(path);
+        directory.mkdirs();
+        String[] files = directory.list();
+        List<String> result = new LinkedList<String>();
+        for (String file : files) {
+            String fileName = file.substring(0, file.lastIndexOf("."));
+            if (StringUtils.isNotEmpty(fileName)) {
+                result.add(fileName);
+            }
+        }
+        return result;
+    }
+
 }
