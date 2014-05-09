@@ -6,4 +6,6 @@ public interface AudioService {
 
     Collection<String> getIdsForAudioDiscovery();
 
+    void collectAudioInfo(Collection<String> ids);
+
 }

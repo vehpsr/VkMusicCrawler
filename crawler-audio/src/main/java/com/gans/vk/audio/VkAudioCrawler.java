@@ -31,5 +31,6 @@ public class VkAudioCrawler {
             LOG.info("No new ID for audio discovery");
             return;
         }
+        _audioService.collectAudioInfo(ids);
     }
 }

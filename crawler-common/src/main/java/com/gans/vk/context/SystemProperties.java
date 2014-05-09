@@ -17,9 +17,10 @@ public class SystemProperties {
         VK_DOMAIN("vk.domain"),
         VK_AUTH_LOGIN_URL_PATTERN("vk.auth.loginUrlPattern"),
         VK_AUTH_COOKIE_DOMAIN("vk.auth.cookieDomain"),
-        VK_AUDIO_URL("vk.audioUrl"),
-        VK_GROUP_MEMBERS_URL("vk.groupMembersUrl"),
-        VK_GROUP_MEMBERS_ENTITY_PATTERN("vk.groupMembersEntityPattern"),
+        VK_AUDIO_URL("vk.audio.url"),
+        VK_AUDIO_ENTITY_PATTERN("vk.audio.entityPattern"),
+        VK_GROUP_MEMBERS_URL("vk.groupMembers.url"),
+        VK_GROUP_MEMBERS_ENTITY_PATTERN("vk.groupMembers.entityPattern"),
 
         VK_HEADER_CONTENT_TYPE("vk.header.content-type"),
         VK_HEADER_USER_AGENT("vk.header.user-agent"),

@@ -12,6 +12,7 @@ import org.apache.commons.logging.LogFactory;
 public class AbstractFileDao {
 
     private static final Log LOG = LogFactory.getLog(AbstractFileDao.class);
+    private static final String EXTENSION = ".txt";
 
     public enum ReadMode {
         UNIQUE
@@ -75,7 +76,7 @@ public class AbstractFileDao {
 
         PrintWriter pw = null;
         try {
-            File file = createFileIfDontExist(path);
+            File file = createIfDontExist(path);
             pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
 
             for (String line : lines) {
@@ -96,7 +97,7 @@ public class AbstractFileDao {
         String[] files = directory.list();
         List<String> result = new LinkedList<String>();
         for (String file : files) {
-            String fileName = file.substring(0, file.lastIndexOf("."));
+            String fileName = file.substring(0, file.lastIndexOf(EXTENSION));
             if (StringUtils.isNotEmpty(fileName)) {
                 result.add(fileName);
             }
