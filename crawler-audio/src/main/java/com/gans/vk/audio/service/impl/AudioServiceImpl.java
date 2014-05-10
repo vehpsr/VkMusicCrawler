@@ -13,6 +13,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.gans.vk.audio.dao.AudioDao;
 import com.gans.vk.audio.dao.impl.AudioDaoImpl;
+import com.gans.vk.audio.parser.AudioLibrary;
+import com.gans.vk.audio.parser.AudioParser;
 import com.gans.vk.audio.service.AudioService;
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.httpclient.HttpVkConnector;
@@ -65,6 +67,7 @@ public class AudioServiceImpl implements AudioService {
             }
 
             String json = jsonCollection[0];
+            AudioLibrary lib = AudioParser.parse(json);
 
             if (_debug) break;
         }
