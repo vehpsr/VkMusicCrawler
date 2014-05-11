@@ -13,10 +13,10 @@ import org.apache.commons.logging.LogFactory;
 
 import com.gans.vk.audio.dao.AudioDao;
 import com.gans.vk.audio.dao.impl.AudioDaoImpl;
-import com.gans.vk.audio.parser.AudioLibrary;
 import com.gans.vk.audio.parser.AudioParser;
 import com.gans.vk.audio.service.AudioService;
 import com.gans.vk.context.SystemProperties;
+import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.httpclient.HttpVkConnector;
 import com.gans.vk.utils.*;
 

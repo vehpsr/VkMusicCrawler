@@ -18,6 +18,10 @@ public class AbstractFileDao {
         UNIQUE
     }
 
+    protected List<String> readFile(File file, ReadMode readMode) {
+        return readFile(file.getPath(), readMode);
+    }
+
     protected List<String> readFile(String path, ReadMode readMode) {
         if (StringUtils.isEmpty(path)) {
             return Collections.emptyList();
@@ -52,6 +56,22 @@ public class AbstractFileDao {
         return result;
     }
 
+
+    protected List<String> readFiles(String dir) {
+        if (StringUtils.isEmpty(dir)) {
+            return Collections.emptyList();
+        }
+
+        File directory = new File(dir);
+        directory.getParentFile().mkdirs();
+
+        List<String> result = new ArrayList<String>();
+        for (File file : directory.listFiles()) {
+            result.addAll(readFile(file, null));
+        }
+        return result;
+    }
+
     private File createIfDontExist(String path) throws IOException {
         File file = new File(path);
         file.getParentFile().mkdirs();
@@ -69,7 +89,7 @@ public class AbstractFileDao {
         return new LinkedList<String>(set);
     }
 
-    public void save(String dir, String fileName, Collection<String> lines) {
+    protected void save(String dir, String fileName, Collection<String> lines) {
         List<String> fileNames = getAllFileNamesInDirectory(dir);
         String newFileName = fileName + EXTENSION;
         if (fileNames.contains(newFileName)) {
@@ -79,7 +99,7 @@ public class AbstractFileDao {
         appendToFile(dir + newFileName, lines);
     }
 
-    public void appendToFile(String path, Collection<String> lines) {
+    protected void appendToFile(String path, Collection<String> lines) {
         if (CollectionUtils.isEmpty(lines) || StringUtils.isEmpty(path)) {
             return;
         }
@@ -101,7 +121,7 @@ public class AbstractFileDao {
         }
     }
 
-    public List<String> getAllFileNamesInDirectory(String path) {
+    protected List<String> getAllFileNamesInDirectory(String path) {
         File directory = new File(path);
         directory.mkdirs();
         String[] files = directory.list();

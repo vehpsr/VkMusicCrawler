@@ -19,6 +19,7 @@
         <module>crawler-common</module>
         <module>crawler-id</module>
         <module>crawler-audio</module>
+        <module>crawler-logic</module>
     </modules>
     
 </project>

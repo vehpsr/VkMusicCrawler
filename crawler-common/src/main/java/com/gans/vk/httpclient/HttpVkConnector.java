@@ -105,6 +105,7 @@ public class HttpVkConnector {
     }
 
     private String getAuthenticationCookie() {
+    	final String VK_SECURITY_COOKIE = "remixsid=";
         String login = SystemProperties.get(VK_LOGIN);
         String pass = SystemProperties.get(VK_PASS);
 
@@ -142,19 +143,23 @@ public class HttpVkConnector {
 
             httpclient.execute(new HttpGet(redirectUrl));
 
-            StringBuilder result = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
             String vkDomain = SystemProperties.get(VK_AUTH_COOKIE_DOMAIN);
-            List<Cookie> cookies = cookieStore.getCookies(); ////TODO check for invalid auth; (if httpOnly secure cookie is present)
+            List<Cookie> cookies = cookieStore.getCookies();
             for (Cookie cookie : cookies) {
                 if (cookie.getDomain().equals(vkDomain)) {
-                    result.append(cookie.getName());
-                    result.append("=");
-                    result.append(cookie.getValue());
-                    result.append(";");
+                    builder.append(cookie.getName());
+                    builder.append("=");
+                    builder.append(cookie.getValue());
+                    builder.append(";");
                 }
             }
+            String result = builder.toString();
+            if (!result.contains(VK_SECURITY_COOKIE)) {
+                throw new IllegalStateException(MessageFormat.format("Fail to authenticate. Not found secure cookie {0} in response for login {1}", VK_SECURITY_COOKIE, login));
+            }
             RestUtils.sleep();
-            return result.toString();
+            return result;
         } catch (Exception e) {
             if (e instanceof NoSuchAlgorithmException ||
                     e instanceof KeyStoreException ||

@@ -2,7 +2,7 @@ package com.gans.vk.audio.dao;
 
 import java.util.List;
 
-import com.gans.vk.audio.parser.AudioLibrary.ArtistData;
+import com.gans.vk.data.ArtistData;
 
 public interface AudioDao {
 
