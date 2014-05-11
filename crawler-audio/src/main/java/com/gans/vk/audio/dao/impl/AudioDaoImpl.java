@@ -3,9 +3,11 @@ package com.gans.vk.audio.dao.impl;
 import static com.gans.vk.context.SystemProperties.Property.CRAWLER_AUDIO_STASH;
 import static com.gans.vk.context.SystemProperties.Property.CRAWLER_ID_STASH;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import com.gans.vk.audio.dao.AudioDao;
+import com.gans.vk.audio.parser.AudioLibrary.ArtistData;
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.dao.AbstractFileDao;
 
@@ -30,6 +32,15 @@ public class AudioDaoImpl extends AbstractFileDao implements AudioDao {
     @Override
     public List<String> getAlreadyProcessedIds() {
         return getAllFileNamesInDirectory(AUDIO_STORAGE_PATH);
+    }
+
+    @Override
+    public void saveAudioCollection(String id, List<ArtistData> entries) {
+        List<String> data = new LinkedList<String>();
+        for (ArtistData entry : entries) {
+            data.add(entry.toString());
+        }
+        save(AUDIO_STORAGE_PATH, id, data);
     }
 
 }

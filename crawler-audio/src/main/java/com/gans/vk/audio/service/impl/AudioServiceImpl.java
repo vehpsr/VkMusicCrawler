@@ -18,8 +18,7 @@ import com.gans.vk.audio.parser.AudioParser;
 import com.gans.vk.audio.service.AudioService;
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.httpclient.HttpVkConnector;
-import com.gans.vk.utils.HtmlUtils;
-import com.gans.vk.utils.RestUtils;
+import com.gans.vk.utils.*;
 
 public class AudioServiceImpl implements AudioService {
 
@@ -55,12 +54,12 @@ public class AudioServiceImpl implements AudioService {
         for (String id : ids) {
             LOG.debug(MessageFormat.format("Discover audio library by id: {0}", id));
 
-            String response = _httpVkConnector.post(url, MessageFormat.format(entityPattern, id)); //TODO check for invalid auth
+            String response = _httpVkConnector.post(url, MessageFormat.format(entityPattern, id));
             String[] jsonCollection = HtmlUtils.sanitizeJson(response);
             if (jsonCollection.length == 0) {
                 LOG.warn(MessageFormat.format("Fail to parse response from VK for id: {0}", id));
-                LOG.debug(MessageFormat.format("VK response:\n{0}", response));
-                RestUtils.sleep("2x");
+                LOG.debug(MessageFormat.format("VK response:\n{0}", TextUtils.shortVersion(response)));
+                RestUtils.sleep("3x");
                 if (_debug) break;
 
                 continue;
@@ -68,6 +67,9 @@ public class AudioServiceImpl implements AudioService {
 
             String json = jsonCollection[0];
             AudioLibrary lib = AudioParser.parse(json);
+            if (lib.isNotEmpty()) {
+                _audioDao.saveAudioCollection(id, lib.getEntries());
+            }
 
             if (_debug) break;
         }

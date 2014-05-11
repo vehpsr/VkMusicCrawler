@@ -11,6 +11,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.gans.vk.utils.TextUtils;
+
 public class AudioParser {
 
     private static final Log LOG = LogFactory.getLog(AudioParser.class);
@@ -38,7 +40,7 @@ public class AudioParser {
             }
             return lib;
         } catch (ParseException e) {
-            LOG.error(MessageFormat.format("Fail to parse response: {0}\n{1}", e.getMessage(), json));
+            LOG.error(MessageFormat.format("Fail to parse response: {0}\n{1}", e.getMessage(), TextUtils.shortVersion(json)));
         }
         return new AudioLibrary();
     }

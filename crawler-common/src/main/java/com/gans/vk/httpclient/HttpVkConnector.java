@@ -144,7 +144,7 @@ public class HttpVkConnector {
 
             StringBuilder result = new StringBuilder();
             String vkDomain = SystemProperties.get(VK_AUTH_COOKIE_DOMAIN);
-            List<Cookie> cookies = cookieStore.getCookies();
+            List<Cookie> cookies = cookieStore.getCookies(); ////TODO check for invalid auth; (if httpOnly secure cookie is present)
             for (Cookie cookie : cookies) {
                 if (cookie.getDomain().equals(vkDomain)) {
                     result.append(cookie.getName());

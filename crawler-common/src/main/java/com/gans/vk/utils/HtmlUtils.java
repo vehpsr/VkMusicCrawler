@@ -29,7 +29,7 @@ public class HtmlUtils {
         }
         Matcher matcher = JSON_PATTERN.matcher(json);
         if (matcher.matches()) {
-            return matcher.group(1).split(VK_JSON_SEPARATOR_PATTERN);
+            return matcher.group(1).replaceAll("'", "\"").split(VK_JSON_SEPARATOR_PATTERN);
         }
         return new String[]{};
     }

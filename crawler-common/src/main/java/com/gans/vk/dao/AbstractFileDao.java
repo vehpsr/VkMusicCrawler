@@ -69,6 +69,16 @@ public class AbstractFileDao {
         return new LinkedList<String>(set);
     }
 
+    public void save(String dir, String fileName, Collection<String> lines) {
+        List<String> fileNames = getAllFileNamesInDirectory(dir);
+        String newFileName = fileName + EXTENSION;
+        if (fileNames.contains(newFileName)) {
+            LOG.warn(MessageFormat.format("File wiht name {0} already exists in directory {1}", newFileName, dir));
+            return;
+        }
+        appendToFile(dir + newFileName, lines);
+    }
+
     public void appendToFile(String path, Collection<String> lines) {
         if (CollectionUtils.isEmpty(lines) || StringUtils.isEmpty(path)) {
             return;
