@@ -25,21 +25,21 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     }
 
     @Override
-    public List<ArtistData> getWhiteList() {
+    public AudioLibrary getWhiteList() {
         return readEntriesFromDirectory(AUDIO_WHITELIST_DIR);
     }
 
     @Override
-    public List<ArtistData> getBlackList() {
+    public AudioLibrary getBlackList() {
         return readEntriesFromDirectory(AUDIO_BLACKLIST_DIR);
     }
 
-    private List<ArtistData> readEntriesFromDirectory(String dir) {
+    private AudioLibrary readEntriesFromDirectory(String dir) {
         List<String> entries = readFiles(dir);
         List<ArtistData> artistData = ArtistData.convert(entries);
         AudioLibrary lib = new AudioLibrary();
         lib.putAll(artistData);
-        return lib.getEntries();
+        return lib;
     }
 
 }

@@ -1,13 +1,16 @@
 package com.gans.vk.logic.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.gans.vk.data.ArtistData;
+import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
 import com.gans.vk.logic.dao.impl.LogicDaoImpl;
+import com.gans.vk.logic.processor.AudioProcessor;
+import com.gans.vk.logic.processor.impl.BayesianAudioProcessor;
 import com.gans.vk.logic.service.LogicService;
 
 public class LogicServiceImpl implements LogicService {
@@ -25,13 +28,21 @@ public class LogicServiceImpl implements LogicService {
     }
 
     @Override
-    public List<ArtistData> getWhiteList() {
+    public AudioLibrary getWhiteList() {
         return _logicDao.getWhiteList();
     }
 
     @Override
-    public List<ArtistData> getBlackList() {
+    public AudioLibrary getBlackList() {
         return _logicDao.getBlackList();
+    }
+
+    @Override
+    public List<AudioProcessor> getProcessors() {
+        List<AudioProcessor> processors = new ArrayList<AudioProcessor>();
+        processors.add(new BayesianAudioProcessor());
+
+        return processors;
     }
 
 }

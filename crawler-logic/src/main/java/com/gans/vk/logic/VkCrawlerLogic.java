@@ -6,7 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.gans.vk.context.SystemProperties;
-import com.gans.vk.data.ArtistData;
+import com.gans.vk.data.AudioLibrary;
+import com.gans.vk.logic.processor.AudioProcessor;
 import com.gans.vk.logic.service.LogicService;
 import com.gans.vk.logic.service.impl.LogicServiceImpl;
 
@@ -26,7 +27,8 @@ public class VkCrawlerLogic {
     }
 
     private void start() {
-        List<ArtistData> whiteList = _logicService.getWhiteList();
-        List<ArtistData> blackList = _logicService.getBlackList();
+        AudioLibrary whiteList = _logicService.getWhiteList();
+        AudioLibrary blackList = _logicService.getBlackList();
+        List<AudioProcessor> processors = _logicService.getProcessors();
     }
 }

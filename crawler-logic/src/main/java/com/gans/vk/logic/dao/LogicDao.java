@@ -1,13 +1,12 @@
 package com.gans.vk.logic.dao;
 
-import java.util.List;
 
-import com.gans.vk.data.ArtistData;
+import com.gans.vk.data.AudioLibrary;
 
 public interface LogicDao {
 
-    List<ArtistData> getWhiteList();
+    AudioLibrary getWhiteList();
 
-    List<ArtistData> getBlackList();
+    AudioLibrary getBlackList();
 
 }

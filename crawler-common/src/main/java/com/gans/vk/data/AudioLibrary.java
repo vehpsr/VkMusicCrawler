@@ -47,4 +47,16 @@ public class AudioLibrary {
         Collections.sort(result);
         return result;
     }
+
+	public int getUniqueEntriesCount() {
+		return _artistsCount.size();
+	}
+	
+	public int getTotalEntriesCount() {
+		int total = 0;
+		for (Integer val : _artistsCount.values()) {
+			total += val;
+		}
+		return total;
+	}
 }

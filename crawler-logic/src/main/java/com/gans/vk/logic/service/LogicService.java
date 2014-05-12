@@ -2,12 +2,15 @@ package com.gans.vk.logic.service;
 
 import java.util.List;
 
-import com.gans.vk.data.ArtistData;
+import com.gans.vk.data.AudioLibrary;
+import com.gans.vk.logic.processor.AudioProcessor;
 
 public interface LogicService {
 
-    List<ArtistData> getWhiteList();
+    AudioLibrary getWhiteList();
 
-    List<ArtistData> getBlackList();
+    AudioLibrary getBlackList();
+
+    List<AudioProcessor> getProcessors();
 
 }

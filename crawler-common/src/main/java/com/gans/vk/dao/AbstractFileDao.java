@@ -56,17 +56,9 @@ public class AbstractFileDao {
         return result;
     }
 
-
     protected List<String> readFiles(String dir) {
-        if (StringUtils.isEmpty(dir)) {
-            return Collections.emptyList();
-        }
-
-        File directory = new File(dir);
-        directory.getParentFile().mkdirs();
-
         List<String> result = new ArrayList<String>();
-        for (File file : directory.listFiles()) {
+        for (File file : filterFiles(dir)) {
             result.addAll(readFile(file, null));
         }
         return result;
@@ -121,18 +113,34 @@ public class AbstractFileDao {
         }
     }
 
-    protected List<String> getAllFileNamesInDirectory(String path) {
-        File directory = new File(path);
-        directory.mkdirs();
-        String[] files = directory.list();
+    protected List<String> getAllFileNamesInDirectory(String dir) {
         List<String> result = new LinkedList<String>();
-        for (String file : files) {
-            String fileName = file.substring(0, file.lastIndexOf(EXTENSION));
-            if (StringUtils.isNotEmpty(fileName)) {
-                result.add(fileName);
-            }
+        for (File file : filterFiles(dir)) {
+            String fileName = file.getName();
+            result.add(fileName.substring(0, fileName.lastIndexOf(EXTENSION)));
         }
         return result;
+    }
+
+    private List<File> filterFiles(String dir) {
+        if (StringUtils.isEmpty(dir)) {
+            return Collections.emptyList();
+        }
+        File directory = new File(dir);
+        directory.mkdirs();
+
+        File[] files = directory.listFiles(new FilenameFilter(){
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(EXTENSION);
+            }
+        });
+
+        if (files == null) {
+            return Collections.emptyList();
+        } else {
+            return Arrays.asList(files);
+        }
     }
 
 }
