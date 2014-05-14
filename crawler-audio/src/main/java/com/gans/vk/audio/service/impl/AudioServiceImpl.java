@@ -66,7 +66,7 @@ public class AudioServiceImpl implements AudioService {
             }
 
             String json = jsonCollection[0];
-            AudioLibrary lib = AudioParser.parse(json);
+            AudioLibrary lib = AudioParser.parse(json, id);
             if (lib.isNotEmpty()) {
                 _audioDao.saveAudioCollection(id, lib.getEntries());
             }

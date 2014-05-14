@@ -19,9 +19,9 @@ public class AudioParser {
     private static final Log LOG = LogFactory.getLog(AudioParser.class);
 
     @SuppressWarnings("unchecked")
-    public static AudioLibrary parse(String json) {
+    public static AudioLibrary parse(String json, String id) {
         if (StringUtils.isEmpty(json)) {
-            return new AudioLibrary();
+            return AudioLibrary.EMPTY;
         }
         final String ALL_SONGS_PROPERTY = "all";
         final int ARTIST_POSITION = 5;
@@ -30,7 +30,7 @@ public class AudioParser {
         try {
             JSONObject obj = (JSONObject)parser.parse(json);
             JSONArray allSongs = (JSONArray)obj.get(ALL_SONGS_PROPERTY);
-            AudioLibrary lib = new AudioLibrary();
+            AudioLibrary lib = new AudioLibrary(id);
             Iterator<JSONArray> songIterator = allSongs.iterator();
             while (songIterator.hasNext()) {
                 JSONArray song = songIterator.next();
@@ -43,7 +43,7 @@ public class AudioParser {
         } catch (ParseException e) {
             LOG.error(MessageFormat.format("Fail to parse response: {0}\n{1}", e.getMessage(), TextUtils.shortVersion(json)));
         }
-        return new AudioLibrary();
+        return AudioLibrary.EMPTY;
     }
 
     private static List<String> standardizeArtists(String artist) {

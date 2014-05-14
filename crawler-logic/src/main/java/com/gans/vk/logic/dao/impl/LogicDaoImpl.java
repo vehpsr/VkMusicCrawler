@@ -10,6 +10,7 @@ import com.gans.vk.dao.AbstractFileDao;
 import com.gans.vk.data.ArtistData;
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
+import com.gans.vk.logic.data.MonochromeList;
 
 public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
 
@@ -26,20 +27,23 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
 
     @Override
     public AudioLibrary getWhiteList() {
-        return readEntriesFromDirectory(AUDIO_WHITELIST_DIR);
+        List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_WHITELIST_DIR);
+        AudioLibrary lib = new AudioLibrary(MonochromeList.WHITE);
+        lib.putAll(artistData);
+        return lib;
     }
 
     @Override
     public AudioLibrary getBlackList() {
-        return readEntriesFromDirectory(AUDIO_BLACKLIST_DIR);
-    }
-
-    private AudioLibrary readEntriesFromDirectory(String dir) {
-        List<String> entries = readFiles(dir);
-        List<ArtistData> artistData = ArtistData.convert(entries);
-        AudioLibrary lib = new AudioLibrary();
+        List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_BLACKLIST_DIR);
+        AudioLibrary lib = new AudioLibrary(MonochromeList.BLACK);
         lib.putAll(artistData);
         return lib;
+    }
+
+    private List<ArtistData> readEntriesFromDirectory(String dir) {
+        List<String> entries = readFiles(dir);
+        return ArtistData.convert(entries);
     }
 
 }

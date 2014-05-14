@@ -6,7 +6,24 @@ import java.util.Map.Entry;
 
 public class AudioLibrary {
 
-    private final Map<String, Integer> _artistsCount = new HashMap<String, Integer>();
+    public static final AudioLibrary EMPTY = new AudioLibrary("") {
+        @Override
+        @SuppressWarnings("unchecked")
+        <T, E> Map<T, E> getArtistsDataStorage() {
+            return (Map<T, E>) Collections.unmodifiableMap(super.getArtistsDataStorage());
+        }
+    };
+
+    private final Map<String, Integer> _artistsCount = getArtistsDataStorage();
+    private String _id;
+
+    public AudioLibrary(String id) {
+        _id = id;
+    }
+
+    <T, E> Map<T, E> getArtistsDataStorage() {
+        return new HashMap<T, E>();
+    }
 
     public void put(String artist) {
         increment(artist, 1);
@@ -31,6 +48,10 @@ public class AudioLibrary {
         _artistsCount.put(artist, count);
     }
 
+    public String getId() {
+        return _id;
+    }
+
     public boolean isEmpty() {
         return _artistsCount.isEmpty();
     }
@@ -48,15 +69,15 @@ public class AudioLibrary {
         return result;
     }
 
-	public int getUniqueEntriesCount() {
-		return _artistsCount.size();
-	}
-	
-	public int getTotalEntriesCount() {
-		int total = 0;
-		for (Integer val : _artistsCount.values()) {
-			total += val;
-		}
-		return total;
-	}
+    public int getUniqueEntriesCount() {
+        return _artistsCount.size();
+    }
+
+    public int getTotalEntriesCount() {
+        int total = 0;
+        for (Integer val : _artistsCount.values()) {
+            total += val;
+        }
+        return total;
+    }
 }

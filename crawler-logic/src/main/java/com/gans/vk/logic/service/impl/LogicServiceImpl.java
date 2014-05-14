@@ -9,8 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
 import com.gans.vk.logic.dao.impl.LogicDaoImpl;
+import com.gans.vk.logic.data.MonochromeList;
 import com.gans.vk.logic.processor.AudioProcessor;
-import com.gans.vk.logic.processor.impl.BayesianAudioProcessor;
+import com.gans.vk.logic.processor.impl.*;
 import com.gans.vk.logic.service.LogicService;
 
 public class LogicServiceImpl implements LogicService {
@@ -38,11 +39,25 @@ public class LogicServiceImpl implements LogicService {
     }
 
     @Override
+    @SuppressWarnings("serial")
     public List<AudioProcessor> getProcessors() {
-        List<AudioProcessor> processors = new ArrayList<AudioProcessor>();
-        processors.add(new BayesianAudioProcessor());
+        final MonochromeList monochromeList = getMonochromeList();
+
+        List<AudioProcessor> processors = new ArrayList<AudioProcessor>() {{
+            add(new BayesianAudioProcessor(monochromeList));
+            add(new AbsoluteDiversityAudioProcessor());
+            add(new PartialDiversityAudioProcessor(5));
+            add(new PartialDiversityAudioProcessor(10));
+        }};
 
         return processors;
+    }
+
+    private MonochromeList getMonochromeList() {
+        return new MonochromeList.Builder()
+                .white(getWhiteList())
+                .black(getBlackList())
+                .build();
     }
 
 }
