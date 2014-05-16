@@ -69,6 +69,15 @@ public class AudioLibrary {
         return result;
     }
 
+    public Set<String> getUniqueArtists() {
+        return _artistsCount.keySet();
+    }
+
+    public int getCount(String artist) {
+        Integer count = _artistsCount.get(artist);
+        return count == null ? 0 : count;
+    }
+
     public int getUniqueEntriesCount() {
         return _artistsCount.size();
     }

@@ -1,5 +1,7 @@
 package com.gans.vk.logic.data;
 
+import java.util.*;
+
 import com.gans.vk.data.AudioLibrary;
 
 public class MonochromeList {
@@ -9,12 +11,50 @@ public class MonochromeList {
     private final AudioLibrary _whiteList;
     private final AudioLibrary _blackList;
 
-    public AudioLibrary getWhiteList() {
-        return _whiteList;
+    private Map<String, Float> _dictionary = null;
+
+    private MonochromeList(Builder builder) {
+        _whiteList = builder._whiteList;
+        _blackList = builder._blackList;
     }
 
-    public AudioLibrary getBlackList() {
-        return _blackList;
+    /**
+     * @return Map[Artist, SpamicityCoeficient] lookup dictionary
+     */
+    public Map<String, Float> dictionary() {
+        if (_dictionary != null) {
+            return _dictionary;
+        }
+
+        final float SPAMICITY_MIN = 0.01f;
+        final float SPAMICITY_MAX = 0.99f;
+
+        Set<String> artists = new HashSet<String>();
+        artists.addAll(_whiteList.getUniqueArtists());
+        artists.addAll(_blackList.getUniqueArtists());
+
+        int totalWhiteCount = _whiteList.getTotalEntriesCount();
+        int totalBlackCount = _blackList.getTotalEntriesCount();
+
+        Map<String, Float> dictionary = new HashMap<String, Float>();
+        for (String artist : artists) {
+            int whiteCount = _whiteList.getCount(artist);
+            int blackCount = _blackList.getCount(artist);
+            if (whiteCount + blackCount == 0) {
+                continue;
+            }
+            float whiteOccurrenceRate = (float) whiteCount / totalWhiteCount;
+            float blackOccurrenceRate = (float) blackCount / totalBlackCount;
+            float spamicity = blackOccurrenceRate / (blackOccurrenceRate + whiteOccurrenceRate);
+            if (spamicity > SPAMICITY_MAX) {
+                spamicity = SPAMICITY_MAX;
+            } else if (spamicity < SPAMICITY_MIN) {
+                spamicity = SPAMICITY_MIN;
+            }
+            dictionary.put(artist, spamicity);
+        }
+
+        return _dictionary = Collections.unmodifiableMap(dictionary);
     }
 
     public static class Builder {
@@ -34,10 +74,5 @@ public class MonochromeList {
         public MonochromeList build() {
             return new MonochromeList(this);
         }
-    }
-
-    private MonochromeList(Builder builder) {
-        _whiteList = builder._whiteList;
-        _blackList = builder._blackList;
     }
 }
