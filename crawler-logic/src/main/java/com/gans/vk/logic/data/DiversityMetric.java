@@ -21,9 +21,9 @@ public class DiversityMetric implements Metric, Comparable<DiversityMetric> {
     @Override
     public int compareTo(DiversityMetric other) {
         if (this._percentageValue > other._percentageValue) {
-            return 1;
-        } else if (this._percentageValue < other._percentageValue) {
             return -1;
+        } else if (this._percentageValue < other._percentageValue) {
+            return 1;
         } else {
             return 0;
         }

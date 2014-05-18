@@ -13,4 +13,6 @@ public interface LogicService {
 
     List<AudioProcessor> getProcessors();
 
+    List<AudioLibrary> getAllAudio();
+
 }

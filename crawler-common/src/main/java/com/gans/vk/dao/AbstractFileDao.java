@@ -64,6 +64,15 @@ public class AbstractFileDao {
         return result;
     }
 
+    protected Map<String, List<String>> readAllFilesInDirectory(String dir) {
+        Map<String, List<String>> result = new HashMap<String, List<String>>();
+        for (File file : filterFiles(dir)) {
+            String name = getFileNameWithoutExtension(file);
+            result.put(name, readFile(file, null));
+        }
+        return result;
+    }
+
     private File createIfDontExist(String path) throws IOException {
         File file = new File(path);
         file.getParentFile().mkdirs();
@@ -116,8 +125,8 @@ public class AbstractFileDao {
     protected List<String> getAllFileNamesInDirectory(String dir) {
         List<String> result = new LinkedList<String>();
         for (File file : filterFiles(dir)) {
-            String fileName = file.getName();
-            result.add(fileName.substring(0, fileName.lastIndexOf(EXTENSION)));
+            String name = getFileNameWithoutExtension(file);
+            result.add(name);
         }
         return result;
     }
@@ -143,4 +152,8 @@ public class AbstractFileDao {
         }
     }
 
+    private String getFileNameWithoutExtension(File file) {
+        String fileName = file.getName();
+        return fileName.substring(0, fileName.lastIndexOf(EXTENSION));
+    }
 }

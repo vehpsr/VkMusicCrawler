@@ -9,9 +9,9 @@ import org.apache.commons.logging.LogFactory;
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
 import com.gans.vk.logic.dao.impl.LogicDaoImpl;
-import com.gans.vk.logic.data.MonochromeList;
 import com.gans.vk.logic.processor.AudioProcessor;
 import com.gans.vk.logic.processor.impl.*;
+import com.gans.vk.logic.service.BayesianService;
 import com.gans.vk.logic.service.LogicService;
 
 public class LogicServiceImpl implements LogicService {
@@ -41,10 +41,10 @@ public class LogicServiceImpl implements LogicService {
     @Override
     @SuppressWarnings("serial")
     public List<AudioProcessor> getProcessors() {
-        final MonochromeList monochromeList = getMonochromeList();
+        final BayesianService bayesianService = getBayesianService();
 
         List<AudioProcessor> processors = new ArrayList<AudioProcessor>() {{
-            add(new BayesianAudioProcessor(monochromeList));
+            add(new BayesianAudioProcessor(bayesianService));
             add(new AbsoluteDiversityAudioProcessor());
             add(new PartialDiversityAudioProcessor(5));
             add(new PartialDiversityAudioProcessor(10));
@@ -53,11 +53,16 @@ public class LogicServiceImpl implements LogicService {
         return processors;
     }
 
-    private MonochromeList getMonochromeList() {
-        return new MonochromeList.Builder()
+    private BayesianService getBayesianService() {
+        return new BayesianService.MonochromeList()
                 .white(getWhiteList())
                 .black(getBlackList())
-                .build();
+                .train();
+    }
+
+    @Override
+    public List<AudioLibrary> getAllAudio() {
+        return _logicDao.getAllAudio();
     }
 
 }

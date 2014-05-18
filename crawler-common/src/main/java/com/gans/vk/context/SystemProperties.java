@@ -32,7 +32,9 @@ public class SystemProperties {
         CRAWLER_AUDIO_DATA_STASH("crawler.audio.data.stash"),
         CRAWLER_AUDIO_WHITELIST_STASH("crawler.audio.whitelist.stash"),
         CRAWLER_AUDIO_BLACKLIST_STASH("crawler.audio.blacklist.stash"),
-        CRAWLER_AUDIO_OUTPUT_DIR("crawler.audio.output.dir");
+        CRAWLER_AUDIO_OUTPUT_DIR("crawler.audio.output.dir"),
+
+        CRAWLER_DEBUG_AUDIO_DATA_STASH("crawler.debug.audio.data.stash");
 
         private String key;
 
