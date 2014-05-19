@@ -9,7 +9,7 @@ import com.gans.vk.dao.AbstractFileDao;
 import com.gans.vk.data.ArtistData;
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
-import com.gans.vk.logic.service.BayesianService;
+import com.gans.vk.logic.processor.Dictionary;
 
 public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
 
@@ -31,7 +31,7 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     @Override
     public AudioLibrary getWhiteList() {
         List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_WHITELIST_DIR);
-        AudioLibrary lib = new AudioLibrary(BayesianService.WHITE);
+        AudioLibrary lib = new AudioLibrary(Dictionary.WHITE);
         lib.putAll(artistData);
         return lib;
     }
@@ -39,7 +39,7 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     @Override
     public AudioLibrary getBlackList() {
         List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_BLACKLIST_DIR);
-        AudioLibrary lib = new AudioLibrary(BayesianService.BLACK);
+        AudioLibrary lib = new AudioLibrary(Dictionary.BLACK);
         lib.putAll(artistData);
         return lib;
     }

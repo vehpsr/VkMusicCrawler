@@ -10,8 +10,8 @@ import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
 import com.gans.vk.logic.dao.impl.LogicDaoImpl;
 import com.gans.vk.logic.processor.AudioProcessor;
+import com.gans.vk.logic.processor.Dictionary;
 import com.gans.vk.logic.processor.impl.*;
-import com.gans.vk.logic.service.BayesianService;
 import com.gans.vk.logic.service.LogicService;
 
 public class LogicServiceImpl implements LogicService {
@@ -41,10 +41,10 @@ public class LogicServiceImpl implements LogicService {
     @Override
     @SuppressWarnings("serial")
     public List<AudioProcessor> getProcessors() {
-        final BayesianService bayesianService = getBayesianService();
+        final Dictionary dictionary = getDictionary();
 
         List<AudioProcessor> processors = new ArrayList<AudioProcessor>() {{
-            add(new BayesianAudioProcessor(bayesianService));
+            add(new AvgRatingAudioProcessor(dictionary));
             add(new AbsoluteDiversityAudioProcessor());
             add(new PartialDiversityAudioProcessor(5));
             add(new PartialDiversityAudioProcessor(10));
@@ -53,8 +53,8 @@ public class LogicServiceImpl implements LogicService {
         return processors;
     }
 
-    private BayesianService getBayesianService() {
-        return new BayesianService.MonochromeList()
+    private Dictionary getDictionary() {
+        return new Dictionary.Builder()
                 .white(getWhiteList())
                 .black(getBlackList())
                 .train();
