@@ -13,4 +13,6 @@ public interface LogicDao {
 
     List<AudioLibrary> getAllAudio();
 
+    void save(List<String> statistics);
+
 }

@@ -1,5 +1,6 @@
 package com.gans.vk.logic.processor;
 
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -7,8 +8,11 @@ import com.gans.vk.data.ArtistData;
 import com.gans.vk.data.AudioLibrary;
 
 public class Dictionary {
-    public static final String BLACK = "BlackList";
-    public static final String WHITE = "WhiteList";
+
+    public enum Lists {
+        BLACK,
+        WHITE
+    }
 
     private final AudioLibrary _whiteList;
     private final AudioLibrary _blackList;
@@ -99,6 +103,28 @@ public class Dictionary {
 
     private boolean hasCyrillic(String artist) {
         return Pattern.compile("[а-я]").matcher(artist).find();
+    }
+
+    public Set<String> getUniqueArtists(Lists list) {
+        switch (list) {
+        case BLACK:
+            return _blackList.getUniqueArtists();
+        case WHITE:
+            return _whiteList.getUniqueArtists();
+        default:
+            throw new AssertionError(MessageFormat.format("Unexpected Dictionary list: {0}", list));
+        }
+    }
+
+    public int getCount(String artist, Lists list) {
+        switch (list) {
+        case BLACK:
+            return _blackList.getCount(artist);
+        case WHITE:
+            return _whiteList.getCount(artist);
+        default:
+            throw new AssertionError(MessageFormat.format("Unexpected Dictionary list: {0}", list));
+        }
     }
 
     public static class Builder {

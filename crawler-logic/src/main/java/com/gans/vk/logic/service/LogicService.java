@@ -15,4 +15,6 @@ public interface LogicService {
 
     List<AudioLibrary> getAllAudio();
 
+    void save(List<String> statistics);
+
 }

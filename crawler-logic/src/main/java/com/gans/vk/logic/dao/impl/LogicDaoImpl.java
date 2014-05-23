@@ -2,6 +2,8 @@ package com.gans.vk.logic.dao.impl;
 
 import static com.gans.vk.context.SystemProperties.Property.*;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import com.gans.vk.context.SystemProperties;
@@ -13,10 +15,12 @@ import com.gans.vk.logic.processor.Dictionary;
 
 public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
 
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("_yyyy_MM_dd_HH_mm");
     private static final String AUDIO_WHITELIST_DIR = SystemProperties.get(CRAWLER_AUDIO_WHITELIST_STASH);
     private static final String AUDIO_BLACKLIST_DIR = SystemProperties.get(CRAWLER_AUDIO_BLACKLIST_STASH);
     private static final String AUDIO_DATA_DIR = SystemProperties.get(CRAWLER_AUDIO_DATA_STASH);
     private static final String DEBUG_AUDIO_DATA_DIR = SystemProperties.get(CRAWLER_DEBUG_AUDIO_DATA_STASH);
+    private static final String AUDIO_OUTPUT_DIR = SystemProperties.get(CRAWLER_AUDIO_OUTPUT_DIR);
     private static LogicDao _instance = new LogicDaoImpl();
 
     private boolean _debug = SystemProperties.debug();
@@ -31,7 +35,7 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     @Override
     public AudioLibrary getWhiteList() {
         List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_WHITELIST_DIR);
-        AudioLibrary lib = new AudioLibrary(Dictionary.WHITE);
+        AudioLibrary lib = new AudioLibrary(Dictionary.Lists.WHITE.toString());
         lib.putAll(artistData);
         return lib;
     }
@@ -39,7 +43,7 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     @Override
     public AudioLibrary getBlackList() {
         List<ArtistData> artistData = readEntriesFromDirectory(AUDIO_BLACKLIST_DIR);
-        AudioLibrary lib = new AudioLibrary(Dictionary.BLACK);
+        AudioLibrary lib = new AudioLibrary(Dictionary.Lists.BLACK.toString());
         lib.putAll(artistData);
         return lib;
     }
@@ -64,4 +68,9 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
         return result;
     }
 
+    @Override
+    public void save(List<String> statistics) {
+        String fileName = "out" + DATE_FORMAT.format(new Date());
+        save(AUDIO_OUTPUT_DIR, fileName, statistics);
+    }
 }

@@ -42,5 +42,16 @@ public class VkCrawlerLogic {
             }
         }
 
+        List<String> statistics = new LinkedList<String>();
+        for (String id : metrics.keySet()) {
+            StringBuilder builder = new StringBuilder();
+            Collection<Entry<AudioProcessor, Metric>> entries = metrics.get(id);
+            for (Entry<AudioProcessor, Metric> entry : entries) {
+                builder.append(entry.getKey().getClass().getSimpleName() + " \t " + entry.getValue() + " \t ");
+            }
+            builder.append(id);
+            statistics.add(builder.toString());
+        }
+        _logicService.save(statistics);
     }
 }
