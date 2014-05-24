@@ -1,10 +1,7 @@
 package com.gans.vk.logic.service.impl;
 
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.*;
+import java.util.Map.Entry;
 
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.dao.LogicDao;
@@ -15,10 +12,10 @@ import com.gans.vk.logic.processor.impl.*;
 import com.gans.vk.logic.processor.impl.AbstractDictionaryCountAudioProcessor.CountMode;
 import com.gans.vk.logic.processor.impl.AbstractDictionaryCountAudioProcessor.DictionaryList;
 import com.gans.vk.logic.service.LogicService;
+import com.google.common.collect.Multimap;
 
 public class LogicServiceImpl implements LogicService {
 
-    private static final Log LOG = LogFactory.getLog(LogicServiceImpl.class);
     private static LogicService _instance = new LogicServiceImpl();
     private LogicDao _logicDao;
 
@@ -62,6 +59,7 @@ public class LogicServiceImpl implements LogicService {
             add(new AbsoluteDiversityAudioProcessor());
             add(new PartialDiversityAudioProcessor(5));
             add(new PartialDiversityAudioProcessor(10));
+            add(new LibraryCountAudioProcessor());
             addAll(absoluteCountProcessors);
             addAll(relativeCountProcessors);
         }};
@@ -89,5 +87,25 @@ public class LogicServiceImpl implements LogicService {
     @Override
     public void save(List<String> statistics) {
         _logicDao.save(statistics);
+    }
+
+    @Override
+    public List<Entry<String, Double>> getAggregatedMetricData(Multimap<String, Entry<AudioProcessor, Number>> metrics) {
+        List<Entry<String, Double>> aggregatedMetric = new ArrayList<Entry<String, Double>>();
+        for (String id : metrics.keySet()) {
+            double metric = 0;
+            Collection<Entry<AudioProcessor, Number>> entries = metrics.get(id);
+            for (Entry<AudioProcessor, Number> entry : entries) {
+                metric += (entry.getValue().doubleValue() * entry.getKey().aggregationValue());
+            }
+            aggregatedMetric.add(new AbstractMap.SimpleEntry<String, Double>(id, metric));
+        }
+        Collections.sort(aggregatedMetric, new Comparator<Entry<String, Double>>() {
+            @Override
+            public int compare(Entry<String, Double> v1, Entry<String, Double> v2) {
+                return v2.getValue().compareTo(v1.getValue());
+            }
+        });
+        return aggregatedMetric;
     }
 }

@@ -30,8 +30,8 @@ public class Dictionary {
         if (_artistRating != null) {
             return _artistRating;
         }
-        final float MIN_BASE_RATING = 0.2f;
         final float MAX_BASE_RATING = 0.8f;
+        final float MIN_BASE_RATING = 0.2f;
 
         Set<String> artists = new HashSet<String>();
         artists.addAll(_whiteList.getUniqueArtists());
@@ -49,7 +49,7 @@ public class Dictionary {
             }
             float whiteOccurrenceRate = (float) whiteCount / totalWhiteCount;
             float blackOccurrenceRate = (float) blackCount / totalBlackCount;
-            float rating = blackOccurrenceRate / (blackOccurrenceRate + whiteOccurrenceRate);
+            float rating = whiteOccurrenceRate / (blackOccurrenceRate + whiteOccurrenceRate);
             if (rating > MAX_BASE_RATING) {
                 rating = MAX_BASE_RATING;
             } else if (rating < MIN_BASE_RATING) {
@@ -66,11 +66,11 @@ public class Dictionary {
         Float baseRating = _artistRating.get(artist);
         if (baseRating == null) {
             if (artist.startsWith("dj")) {
-                baseRating = 0.65f;
+                baseRating = 0.35f;
             } else if (hasCyrillic(artist)) {
-                baseRating = 0.6f;
+                baseRating = 0.4f;
             } else {
-                baseRating = 0.45f;
+                baseRating = 0.55f;
             }
         }
 
@@ -92,10 +92,10 @@ public class Dictionary {
             power = count;
         }
 
-        if (baseRating < NEUTRAL_RATING) {
-            return baseRating * Math.pow(0.95, power); // max decrees in 2 times
-        } else if (baseRating > NEUTRAL_RATING) {
-            return baseRating * Math.pow(1.1, power); // max increase in 3 times
+        if (baseRating > NEUTRAL_RATING) {
+            return baseRating * Math.pow(1.06, power); // max increase in 2 times
+        } else if (baseRating < NEUTRAL_RATING) {
+            return baseRating * Math.pow(0.92, power); // max decrees in 3 times
         }
         return NEUTRAL_RATING;
     }

@@ -16,6 +16,8 @@ public class AudioLibrary {
 
     private final Map<String, Integer> _artistsCount = getArtistsDataStorage();
     private String _id;
+    /** lazy initialization of total audio library count */
+    private int _size = 0;
 
     public AudioLibrary(String id) {
         _id = id;
@@ -83,10 +85,11 @@ public class AudioLibrary {
     }
 
     public int getTotalEntriesCount() {
-        int total = 0;
-        for (Integer val : _artistsCount.values()) {
-            total += val;
+        if (_size == 0 && !_artistsCount.isEmpty()) {
+            for (Integer val : _artistsCount.values()) {
+                _size += val;
+            }
         }
-        return total;
+        return _size;
     }
 }

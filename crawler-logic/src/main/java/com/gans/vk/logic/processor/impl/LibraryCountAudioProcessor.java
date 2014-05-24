@@ -6,27 +6,27 @@ import java.util.Map.Entry;
 import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.processor.AudioProcessor;
 
-public class AbsoluteDiversityAudioProcessor implements AudioProcessor {
+public class LibraryCountAudioProcessor implements AudioProcessor {
 
     @Override
     public String metricDescription() {
-        return "Absolute diversity processor: percentage of unique artist in library to total library size.";
+        return "Audio processor that return audio library size.";
     }
 
     @Override
     public Entry<String, Number> evaluate(AudioLibrary lib) {
-        float diversity = (float) lib.getUniqueEntriesCount() / lib.getTotalEntriesCount() * 100;
-        return new AbstractMap.SimpleEntry<String, Number>(lib.getId(), diversity);
+        int count = lib.getTotalEntriesCount();
+        return new AbstractMap.SimpleEntry<String, Number>(lib.getId(), count);
     }
 
     @Override
     public double aggregationValue() {
-        return 0;
+        return 0.004;
     }
 
     @Override
     public String metricName() {
-        return "AbsDiv-ty";
+        return "LibCount";
     }
 
 }
