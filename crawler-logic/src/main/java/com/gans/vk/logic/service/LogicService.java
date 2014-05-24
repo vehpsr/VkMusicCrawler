@@ -13,8 +13,10 @@ public interface LogicService {
 
     List<AudioProcessor> getProcessors();
 
-    List<AudioLibrary> getAllAudio();
+    List<String> getAllAudioFiles();
 
     void save(List<String> statistics);
+
+    AudioLibrary getLibrary(String file);
 
 }

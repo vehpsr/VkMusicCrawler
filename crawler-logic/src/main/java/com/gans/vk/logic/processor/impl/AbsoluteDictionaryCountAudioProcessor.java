@@ -8,7 +8,6 @@ import com.gans.vk.data.AudioLibrary;
 import com.gans.vk.logic.data.CountMetric;
 import com.gans.vk.logic.data.Metric;
 import com.gans.vk.logic.processor.Dictionary;
-import com.gans.vk.logic.processor.Dictionary.Lists;
 
 public class AbsoluteDictionaryCountAudioProcessor extends AbstractDictionaryCountAudioProcessor {
 
@@ -30,8 +29,8 @@ public class AbsoluteDictionaryCountAudioProcessor extends AbstractDictionaryCou
     public int getAbsoluteCount(AudioLibrary lib) {
         int count = 0;
         for (String artist : lib.getUniqueArtists()) {
-            boolean isWhite = _dictionary.getCount(artist, Lists.WHITE) > 0;
-            boolean isBlack = _dictionary.getCount(artist, Lists.BLACK) > 0;
+            boolean isWhite = _dictionary.isWhite(artist);
+            boolean isBlack = _dictionary.isBlack(artist);
             if (!isWhite && !isBlack) {
                 continue;
             }

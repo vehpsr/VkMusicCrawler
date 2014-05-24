@@ -77,13 +77,17 @@ public class LogicServiceImpl implements LogicService {
     }
 
     @Override
-    public List<AudioLibrary> getAllAudio() {
-        return _logicDao.getAllAudio();
+    public List<String> getAllAudioFiles() {
+        return _logicDao.getAllAudioFiles();
+    }
+
+    @Override
+    public AudioLibrary getLibrary(String file) {
+        return _logicDao.getLibrary(file);
     }
 
     @Override
     public void save(List<String> statistics) {
         _logicDao.save(statistics);
     }
-
 }

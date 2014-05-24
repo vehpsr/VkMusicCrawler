@@ -73,6 +73,10 @@ public class AbstractFileDao {
         return result;
     }
 
+    protected List<String> readFileFromDirectory(String dir, String fileName) {
+        return readFile(dir + fileName + EXTENSION, null);
+    }
+
     private File createIfDontExist(String path) throws IOException {
         File file = new File(path);
         file.getParentFile().mkdirs();

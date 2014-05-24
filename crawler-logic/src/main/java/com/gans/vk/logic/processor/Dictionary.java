@@ -1,6 +1,5 @@
 package com.gans.vk.logic.processor;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -105,26 +104,12 @@ public class Dictionary {
         return Pattern.compile("[а-я]").matcher(artist).find();
     }
 
-    public Set<String> getUniqueArtists(Lists list) {
-        switch (list) {
-        case BLACK:
-            return _blackList.getUniqueArtists();
-        case WHITE:
-            return _whiteList.getUniqueArtists();
-        default:
-            throw new AssertionError(MessageFormat.format("Unexpected Dictionary list: {0}", list));
-        }
+    public boolean isWhite(String artist) {
+        return _whiteList.getCount(artist) > 0;
     }
 
-    public int getCount(String artist, Lists list) {
-        switch (list) {
-        case BLACK:
-            return _blackList.getCount(artist);
-        case WHITE:
-            return _whiteList.getCount(artist);
-        default:
-            throw new AssertionError(MessageFormat.format("Unexpected Dictionary list: {0}", list));
-        }
+    public boolean isBlack(String artist) {
+        return _blackList.getCount(artist) > 0;
     }
 
     public static class Builder {

@@ -4,7 +4,8 @@ import static com.gans.vk.context.SystemProperties.Property.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.dao.AbstractFileDao;
@@ -24,8 +25,10 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     private static LogicDao _instance = new LogicDaoImpl();
 
     private boolean _debug = SystemProperties.debug();
+    private String _audioDataDir;
 
     private LogicDaoImpl() {
+        _audioDataDir = _debug ? DEBUG_AUDIO_DATA_DIR : AUDIO_DATA_DIR;
     }
 
     public static LogicDao getInstance() {
@@ -54,18 +57,17 @@ public class LogicDaoImpl extends AbstractFileDao implements LogicDao {
     }
 
     @Override
-    public List<AudioLibrary> getAllAudio() {
-        String audioDataDir = AUDIO_DATA_DIR;
-        if (_debug) audioDataDir = DEBUG_AUDIO_DATA_DIR;
+    public List<String> getAllAudioFiles() {
+        return getAllFileNamesInDirectory(_audioDataDir);
+    }
 
-        Map<String, List<String>> allAudio = readAllFilesInDirectory(audioDataDir);
-        List<AudioLibrary> result = new ArrayList<AudioLibrary>();
-        for (String id : allAudio.keySet()) {
-            AudioLibrary lib = new AudioLibrary(id);
-            lib.putAll(ArtistData.convert(allAudio.get(id)));
-            result.add(lib);
-        }
-        return result;
+    @Override
+    public AudioLibrary getLibrary(String fileName) {
+        List<String> entries = readFileFromDirectory(_audioDataDir, fileName);
+        AudioLibrary lib = new AudioLibrary(fileName);
+        List<ArtistData> artistData = ArtistData.convert(entries);
+        lib.putAll(artistData);
+        return lib;
     }
 
     @Override

@@ -32,10 +32,11 @@ public class VkCrawlerLogic {
 
     private void start() {
         List<AudioProcessor> processors = _logicService.getProcessors();
-        List<AudioLibrary> allAudio = _logicService.getAllAudio();
+        List<String> files = _logicService.getAllAudioFiles();
 
         Multimap<String, Entry<AudioProcessor, Metric>> metrics = ArrayListMultimap.create();
-        for (AudioLibrary lib : allAudio) {
+        for (String file : files) {
+            AudioLibrary lib = _logicService.getLibrary(file);
             for (AudioProcessor processor : processors) {
                 Entry<String, Metric> entry = processor.evaluate(lib);
                 metrics.put(entry.getKey(), new AbstractMap.SimpleEntry<AudioProcessor, Metric>(processor, entry.getValue()));
@@ -47,11 +48,17 @@ public class VkCrawlerLogic {
             StringBuilder builder = new StringBuilder();
             Collection<Entry<AudioProcessor, Metric>> entries = metrics.get(id);
             for (Entry<AudioProcessor, Metric> entry : entries) {
-                builder.append(entry.getKey().getClass().getSimpleName() + " \t " + entry.getValue() + " \t ");
+                builder.append(getMetricName(entry.getKey()) + " \t " + entry.getValue() + " \t ");
             }
             builder.append(id);
             statistics.add(builder.toString());
         }
         _logicService.save(statistics);
     }
+
+	private String getMetricName(AudioProcessor processor) {
+		final String AUDIO_PROCESSOR_SUFFIX = "AP";
+		String acronim = processor.getClass().getSimpleName().replaceAll("[a-z]", "");
+		return acronim.substring(0, acronim.lastIndexOf(AUDIO_PROCESSOR_SUFFIX));
+	}
 }

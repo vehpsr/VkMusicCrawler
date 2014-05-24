@@ -11,8 +11,10 @@ public interface LogicDao {
 
     AudioLibrary getBlackList();
 
-    List<AudioLibrary> getAllAudio();
+    List<String> getAllAudioFiles();
 
     void save(List<String> statistics);
+
+    AudioLibrary getLibrary(String file);
 
 }
