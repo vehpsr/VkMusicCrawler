@@ -35,8 +35,7 @@ public class VkIdCrawler {
 
         List<GroupInfo> groupInfos = _idService.getGroupInfos(groups);
         for (GroupInfo groupInfo : groupInfos) {
-            List<String> membersId = _idService.discoverGroupMembersId(groupInfo);
-            _idService.saveNewIds(membersId);
+            _idService.discoverGroupMembersId(groupInfo);
         }
     }
 }

@@ -23,7 +23,7 @@
         <level value="INFO"/>
     </logger>
     <logger name="com.gans.vk.id.service.impl">
-        <level value="DEBUG"/>
+        <level value="INFO"/>
     </logger>
     <logger name="com.gans.vk.audio.service.impl">
         <level value="DEBUG"/>

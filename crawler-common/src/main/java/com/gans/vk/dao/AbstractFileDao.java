@@ -13,6 +13,7 @@ public class AbstractFileDao {
 
     private static final Log LOG = LogFactory.getLog(AbstractFileDao.class);
     private static final String EXTENSION = ".txt";
+    private static final String COMMENT = "#";
 
     public enum ReadMode {
         UNIQUE
@@ -34,7 +35,10 @@ public class AbstractFileDao {
             reader = new BufferedReader(new FileReader(file));
             String line;
             while ((line = reader.readLine()) != null) {
-                if (StringUtils.isNotBlank(line)) {
+                if (StringUtils.isBlank(line)) {
+                    continue;
+                }
+                if (!line.startsWith(COMMENT)) {
                     result.add(line.trim());
                 }
             }

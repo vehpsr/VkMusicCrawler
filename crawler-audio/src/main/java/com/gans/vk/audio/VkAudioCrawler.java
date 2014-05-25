@@ -1,5 +1,6 @@
 package com.gans.vk.audio;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -31,6 +32,9 @@ public class VkAudioCrawler {
             LOG.info("No new ID for audio discovery");
             return;
         }
+
+        LOG.info(MessageFormat.format("Found new ids to collect, size: {0}", ids.size()));
+
         _audioService.collectAudioInfo(ids);
     }
 }

@@ -21,7 +21,7 @@ public class LibraryCountAudioProcessor implements AudioProcessor {
 
     @Override
     public double aggregationValue() {
-        return 0.004;
+        return 0.001;
     }
 
     @Override

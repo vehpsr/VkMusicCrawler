@@ -51,6 +51,7 @@ public class AudioServiceImpl implements AudioService {
     public void collectAudioInfo(Collection<String> ids) {
         String url = SystemProperties.get(VK_AUDIO_URL);
         String entityPattern = SystemProperties.get(VK_AUDIO_ENTITY_PATTERN);
+        boolean wasPreviousRequestInError = false;
         for (String id : ids) {
             LOG.debug(MessageFormat.format("Discover audio library by id: {0}", id));
 
@@ -60,6 +61,11 @@ public class AudioServiceImpl implements AudioService {
                 LOG.warn(MessageFormat.format("Fail to parse response from VK for id: {0}", id));
                 LOG.debug(MessageFormat.format("VK response:\n{0}", TextUtils.shortVersion(response)));
                 RestUtils.sleep("3x");
+                if (wasPreviousRequestInError) {
+                    RestUtils.sleep("6x");
+                }
+                wasPreviousRequestInError = true;
+
                 if (_debug) break;
 
                 continue;
@@ -69,6 +75,7 @@ public class AudioServiceImpl implements AudioService {
             AudioLibrary lib = AudioParser.parse(json, id);
             if (lib.isNotEmpty()) {
                 _audioDao.saveAudioCollection(id, lib.getEntries());
+                wasPreviousRequestInError = false;
             }
 
             if (_debug) break;

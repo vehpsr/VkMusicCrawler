@@ -21,7 +21,7 @@ public class AbsoluteDiversityAudioProcessor implements AudioProcessor {
 
     @Override
     public double aggregationValue() {
-        return 0;
+        return 0.1;
     }
 
     @Override

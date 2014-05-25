@@ -42,7 +42,7 @@ public class RelativeDictionaryCountAudioProcessor implements AudioProcessor {
     @Override
     public double aggregationValue() {
         if (_processor._dictionaryList.equals(DictionaryList.WHITE_ONLY) && _processor._countMode.equals(CountMode.ARTISTS)) {
-            return 0.75;
+            return 1.0;
         } else {
             return 0;
         }

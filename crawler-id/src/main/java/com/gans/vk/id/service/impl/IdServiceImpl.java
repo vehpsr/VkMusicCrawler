@@ -135,35 +135,51 @@ public class IdServiceImpl implements IdService {
     }
 
     @Override
-    public List<String> discoverGroupMembersId(GroupInfo groupInfo) {
+    public void discoverGroupMembersId(GroupInfo groupInfo) {
         LOG.info(MessageFormat.format("Collect members id from group: {0}", groupInfo.toString()));
 
-        List<String> membersUrlsBucket = new ArrayList<String>();
+        GroupStatistics groupStatistics = new GroupStatistics(groupInfo);
 
         int offset = 0;
         final int PEOPLE_ON_PAGE = 60;
+        String lastPersonUrl = "";
         while (offset < groupInfo.getMembersCount()) {
+            LOG.info(MessageFormat.format("Offset: {0}", offset));
             List<String> membersUrls = getGroupMembersUrls(groupInfo.getGroupId(), offset);
-            membersUrlsBucket.addAll(membersUrls);
+            if (membersUrls.isEmpty()) {
+                LOG.warn("Fail to discover group members.");
+                RestUtils.sleep("3x");
+                continue;
+            }
+            if (lastPersonUrl.equals(membersUrls.get(membersUrls.size() - 1))) {
+                LOG.info("Same subset. Exit group members discovery.");
+                break;
+            } else {
+                lastPersonUrl = membersUrls.get(membersUrls.size() - 1);
+            }
+
             offset += PEOPLE_ON_PAGE;
             RestUtils.sleep();
+
+            List<String> ids = new ArrayList<String>();
+            for (String memberUrl : membersUrls) {
+                String id = lookupMemberId(memberUrl, groupStatistics);
+                if (StringUtils.isNotEmpty(id)) {
+                    ids.add(id);
+                } else {
+                    RestUtils.sleep("2x");
+                }
+                RestUtils.sleep();
+            }
+
+            if (!ids.isEmpty()) {
+                saveNewIds(ids);
+            }
 
             if (_debug) break;
         }
 
-        List<String> ids = new ArrayList<String>();
-        GroupStatistics groupStatistics = new GroupStatistics(groupInfo);
-        for (String memberUrl : membersUrlsBucket) {
-            String id = lookupMemberId(memberUrl, groupStatistics);
-            if (StringUtils.isNotEmpty(id)) {
-                ids.add(id);
-            }
-            RestUtils.sleep();
-        }
-
         LOG.info(groupStatistics.getGroupStatistics());
-
-        return ids;
     }
 
     private List<String> getGroupMembersUrls(String groupId, int offset) {
