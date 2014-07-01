@@ -10,4 +10,8 @@ public interface IdDao {
     List<String> getGroups();
 
     void saveIds(Collection<String> idsToSave);
+
+    void saveUrls(Collection<String> urls);
+
+    List<String> getUniqueUrls(List<String> urls);
 }

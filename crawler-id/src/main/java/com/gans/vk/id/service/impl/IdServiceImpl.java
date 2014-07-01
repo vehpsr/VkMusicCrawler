@@ -161,8 +161,10 @@ public class IdServiceImpl implements IdService {
             offset += PEOPLE_ON_PAGE;
             RestUtils.sleep();
 
+            Collection<String> uniqueMembersUrls = _idDao.getUniqueUrls(membersUrls);
+
             List<String> ids = new ArrayList<String>();
-            for (String memberUrl : membersUrls) {
+            for (String memberUrl : uniqueMembersUrls) {
                 String id = lookupMemberId(memberUrl, groupStatistics);
                 if (StringUtils.isNotEmpty(id)) {
                     ids.add(id);
@@ -174,6 +176,7 @@ public class IdServiceImpl implements IdService {
 
             if (!ids.isEmpty()) {
                 saveNewIds(ids);
+                _idDao.saveUrls(uniqueMembersUrls);
             }
 
             if (_debug) break;

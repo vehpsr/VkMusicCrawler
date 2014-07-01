@@ -29,6 +29,7 @@ public class SystemProperties {
 
         CRAWLER_ID_STASH("crawler.id.stash"),
         CRAWLER_GROUP_STASH("crawler.group.stash"),
+        CRAWLER_URL_STASH("crawler.url.stash"),
         CRAWLER_AUDIO_DATA_STASH("crawler.audio.data.stash"),
         CRAWLER_AUDIO_WHITELIST_STASH("crawler.audio.whitelist.stash"),
         CRAWLER_AUDIO_BLACKLIST_STASH("crawler.audio.blacklist.stash"),
