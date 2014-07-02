@@ -35,8 +35,6 @@ public class SystemProperties {
         CRAWLER_AUDIO_BLACKLIST_STASH("crawler.audio.blacklist.stash"),
         CRAWLER_AUDIO_OUTPUT_DIR("crawler.audio.output.dir"),
 
-        CRAWLER_AUDIO_REPORT_INCLUDE_ALL_STATISTICS("crawler.audio.report.includeAllStatistics"),
-
         CRAWLER_DEBUG_AUDIO_DATA_STASH("crawler.debug.audio.data.stash");
 
         private String key;
@@ -49,7 +47,8 @@ public class SystemProperties {
     public enum NumericProperty {
         CRAWLER_DDOS_TIMEOUT_MIN("crawler.ddosTimeout.min"),
         CRAWLER_DDOS_TIMEOUT_RAND("crawler.ddosTimeout.randomization"),
-        CRAWLER_ID_MIN_AUDIO_LIB_SIZE("crawler.id.minAudioLibrarySize");
+        CRAWLER_ID_MIN_AUDIO_LIB_SIZE("crawler.id.minAudioLibrarySize"),
+        CRAWLER_AUDIO_TOP_ARTISTS_COUNT("crawler.audio.report.topArtistsCount");
 
         private String key;
 

@@ -108,4 +108,10 @@ public class LogicServiceImpl implements LogicService {
         });
         return aggregatedMetric;
     }
+
+    @Override
+    public Map<String, Entry<Integer, Integer>> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

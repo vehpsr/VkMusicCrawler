@@ -1,6 +1,6 @@
 package com.gans.vk.logic.service;
 
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
 
 import com.gans.vk.data.AudioLibrary;
@@ -22,5 +22,7 @@ public interface LogicService {
     AudioLibrary getLibrary(String file);
 
     List<Entry<String, Double>> getAggregatedMetricData(Multimap<String, Entry<AudioProcessor, Number>> metrics);
+
+    Map<String, Entry<Integer, Integer>> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData);
 
 }
