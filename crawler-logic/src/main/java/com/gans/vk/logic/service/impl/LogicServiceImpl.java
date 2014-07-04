@@ -1,9 +1,12 @@
 package com.gans.vk.logic.service.impl;
 
+import static com.gans.vk.context.SystemProperties.NumericProperty.CRAWLER_AUDIO_TOP_ARTISTS_COUNT;
+
 import java.util.*;
 import java.util.Map.Entry;
 
-import com.gans.vk.data.AudioLibrary;
+import com.gans.vk.context.SystemProperties;
+import com.gans.vk.data.*;
 import com.gans.vk.logic.dao.LogicDao;
 import com.gans.vk.logic.dao.impl.LogicDaoImpl;
 import com.gans.vk.logic.processor.AudioProcessor;
@@ -110,8 +113,35 @@ public class LogicServiceImpl implements LogicService {
     }
 
     @Override
-    public Map<String, Entry<Integer, Integer>> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData) {
-        // TODO Auto-generated method stub
-        return null;
+    public List<RecommendedArtistsData> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData) {
+        int topArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        List<String> ids = new ArrayList<String>();
+        for (Iterator<Entry<String, Double>> iterator = aggregatedData.iterator(); iterator.hasNext() && topArtistsCount > 0; topArtistsCount--) {
+            ids.add(iterator.next().getKey());
+        }
+
+        AudioLibrary whiteList = getWhiteList();
+
+        AudioLibrary artistCount = new AudioLibrary("artistCount");
+        AudioLibrary songsCount = new AudioLibrary("songsCount");
+        for (String id : ids) {
+            AudioLibrary library = getLibrary(id);
+            for (ArtistData data : library.getEntries()) {
+                String artist = data.getKey();
+                if (whiteList.getCount(artist) == 0) {
+                    artistCount.put(artist);
+                    songsCount.put(data);
+                }
+            }
+        }
+
+        List<RecommendedArtistsData> recommendedArtists = new ArrayList<RecommendedArtistsData>();
+        int recommendedArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        for (Iterator<ArtistData> iterator = artistCount.getEntries().iterator(); iterator.hasNext() && recommendedArtistsCount > 0; recommendedArtistsCount--) {
+            ArtistData data = iterator.next();
+            int totalSongs = songsCount.getCount(data.getKey());
+            recommendedArtists.add(new RecommendedArtistsData(data.getKey(), data.getValue(), totalSongs));
+        }
+        return recommendedArtists;
     }
 }

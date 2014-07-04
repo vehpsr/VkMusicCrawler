@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.gans.vk.context.SystemProperties;
 import com.gans.vk.data.AudioLibrary;
+import com.gans.vk.data.RecommendedArtistsData;
 import com.gans.vk.logic.processor.AudioProcessor;
 import com.gans.vk.logic.service.LogicService;
 import com.gans.vk.logic.service.impl.LogicServiceImpl;
@@ -44,9 +45,9 @@ public class VkLogicCrawler {
         }
 
         List<Entry<String, Double>> aggregatedData = _logicService.getAggregatedMetricData(metrics);
-        Map<String, Entry<Integer, Integer>> recommendedArtists = _logicService.computeRecommendedArtists(aggregatedData);
+        List<RecommendedArtistsData> recommendedArtists = _logicService.computeRecommendedArtists(aggregatedData);
 
-        List<String> statistics = OutputFormatter.format(aggregatedData, metrics);
+        List<String> statistics = OutputFormatter.format(aggregatedData, metrics, recommendedArtists);
 
         _logicService.save(statistics);
     }

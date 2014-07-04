@@ -7,6 +7,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import com.gans.vk.context.SystemProperties;
+import com.gans.vk.data.RecommendedArtistsData;
 import com.gans.vk.logic.processor.AudioProcessor;
 import com.google.common.collect.Multimap;
 
@@ -14,7 +15,7 @@ public class OutputFormatter {
 
      private static final DecimalFormat FORMATER = new DecimalFormat("#.##");
 
-     public static List<String> format(List<Entry<String, Double>> aggregatedData, Multimap<String, Entry<AudioProcessor, Number>> metrics) {
+     public static List<String> format(List<Entry<String, Double>> aggregatedData, Multimap<String, Entry<AudioProcessor, Number>> metrics, List<RecommendedArtistsData> recommendedArtists) {
         if (metrics.isEmpty() || aggregatedData.isEmpty()) {
             return Collections.emptyList();
         }
@@ -37,6 +38,12 @@ public class OutputFormatter {
         // top best audio libraries
         int topArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
         result.addAll(top(topArtistsCount, aggregatedData, metrics));
+
+        // recommended artists
+        result.add("\nRecommended artists for you are:");
+        for (RecommendedArtistsData recommendedArtist : recommendedArtists) {
+            result.add(recommendedArtist.format());
+        }
 
         // top worst libraries
         result.add("\nThis you might consider to add to BlackList");
