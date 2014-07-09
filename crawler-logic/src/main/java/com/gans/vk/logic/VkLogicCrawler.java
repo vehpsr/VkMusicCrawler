@@ -23,6 +23,7 @@ public class VkLogicCrawler {
     public static void main(String[] args) {
         LOG.info("debug: " + SystemProperties.debug());
         new VkLogicCrawler().start();
+        LOG.info("done");
     }
 
     private LogicService _logicService;
@@ -45,9 +46,11 @@ public class VkLogicCrawler {
         }
 
         List<Entry<String, Double>> aggregatedData = _logicService.getAggregatedMetricData(metrics);
-        List<RecommendedArtistsData> recommendedArtists = _logicService.computeRecommendedArtists(aggregatedData);
+        List<RecommendedArtistsData> recommendedWhiteListArtists = _logicService.recommendedWhiteListArtists(aggregatedData);
+        List<RecommendedArtistsData> recommendedBlackListArtists = _logicService.recommendedBlackListArtists(aggregatedData);
+        List<RecommendedArtistsData> recommendedBlackWithoutWhiteListArtists = _logicService.recommendedBlackWithoutWhiteListArtists(aggregatedData);
 
-        List<String> statistics = OutputFormatter.format(aggregatedData, metrics, recommendedArtists);
+        List<String> statistics = OutputFormatter.format(aggregatedData, metrics, recommendedWhiteListArtists, recommendedBlackListArtists, recommendedBlackWithoutWhiteListArtists);
 
         _logicService.save(statistics);
     }

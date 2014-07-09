@@ -113,22 +113,45 @@ public class LogicServiceImpl implements LogicService {
     }
 
     @Override
-    public List<RecommendedArtistsData> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData) {
-        int topArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+    public List<RecommendedArtistsData> recommendedWhiteListArtists(List<Entry<String, Double>> aggregatedData) {
+        int artistCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
         List<String> ids = new ArrayList<String>();
-        for (Iterator<Entry<String, Double>> iterator = aggregatedData.iterator(); iterator.hasNext() && topArtistsCount > 0; topArtistsCount--) {
+        for (Iterator<Entry<String, Double>> iterator = aggregatedData.iterator(); iterator.hasNext() && artistCount > 0; artistCount--) {
             ids.add(iterator.next().getKey());
         }
+        return recommendedArtists(ids, getWhiteList());
+    }
 
-        AudioLibrary whiteList = getWhiteList();
+    @Override
+    public List<RecommendedArtistsData> recommendedBlackListArtists(List<Entry<String, Double>> aggregatedData) {
+        int artistCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        List<String> ids = new ArrayList<String>();
+        for (ListIterator<Entry<String, Double>> iterator = aggregatedData.listIterator(aggregatedData.size()); iterator.hasPrevious() && artistCount > 0; artistCount--) {
+            ids.add(iterator.previous().getKey());
+        }
+        return recommendedArtists(ids, getBlackList());
+    }
 
+    @Override
+    public List<RecommendedArtistsData> recommendedBlackWithoutWhiteListArtists(List<Entry<String, Double>> aggregatedData) {
+        int artistCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        List<String> ids = new ArrayList<String>();
+        for (ListIterator<Entry<String, Double>> iterator = aggregatedData.listIterator(aggregatedData.size()); iterator.hasPrevious() && artistCount > 0; artistCount--) {
+            ids.add(iterator.previous().getKey());
+        }
+        AudioLibrary lib = getBlackList();
+        lib.putAll(getWhiteList().getEntries());
+        return recommendedArtists(ids, lib);
+    }
+
+    public List<RecommendedArtistsData> recommendedArtists(List<String> ids, AudioLibrary list) {
         AudioLibrary artistCount = new AudioLibrary("artistCount");
         AudioLibrary songsCount = new AudioLibrary("songsCount");
         for (String id : ids) {
             AudioLibrary library = getLibrary(id);
             for (ArtistData data : library.getEntries()) {
                 String artist = data.getKey();
-                if (whiteList.getCount(artist) == 0) {
+                if (list.getCount(artist) == 0) {
                     artistCount.put(artist);
                     songsCount.put(data);
                 }
@@ -142,6 +165,7 @@ public class LogicServiceImpl implements LogicService {
             int totalSongs = songsCount.getCount(data.getKey());
             recommendedArtists.add(new RecommendedArtistsData(data.getKey(), data.getValue(), totalSongs));
         }
+
         return recommendedArtists;
     }
 }

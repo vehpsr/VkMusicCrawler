@@ -24,6 +24,10 @@ public interface LogicService {
 
     List<Entry<String, Double>> getAggregatedMetricData(Multimap<String, Entry<AudioProcessor, Number>> metrics);
 
-    List<RecommendedArtistsData> computeRecommendedArtists(List<Entry<String, Double>> aggregatedData);
+    List<RecommendedArtistsData> recommendedWhiteListArtists(List<Entry<String, Double>> aggregatedData);
+
+    List<RecommendedArtistsData> recommendedBlackListArtists(List<Entry<String, Double>> aggregatedData);
+
+    List<RecommendedArtistsData> recommendedBlackWithoutWhiteListArtists(List<Entry<String, Double>> aggregatedData);
 
 }

@@ -15,7 +15,7 @@ public class OutputFormatter {
 
      private static final DecimalFormat FORMATER = new DecimalFormat("#.##");
 
-     public static List<String> format(List<Entry<String, Double>> aggregatedData, Multimap<String, Entry<AudioProcessor, Number>> metrics, List<RecommendedArtistsData> recommendedArtists) {
+     public static List<String> format(List<Entry<String, Double>> aggregatedData, Multimap<String, Entry<AudioProcessor, Number>> metrics, List<RecommendedArtistsData> recommendedArtists, List<RecommendedArtistsData> recommendedBlackListArtists, List<RecommendedArtistsData> recommendedBlackWithoutWhiteListArtists) {
         if (metrics.isEmpty() || aggregatedData.isEmpty()) {
             return Collections.emptyList();
         }
@@ -39,9 +39,21 @@ public class OutputFormatter {
         int topArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
         result.addAll(top(topArtistsCount, aggregatedData, metrics));
 
-        // recommended artists
+        // recommended white list artists
         result.add("\nRecommended artists for you are:");
         for (RecommendedArtistsData recommendedArtist : recommendedArtists) {
+            result.add(recommendedArtist.format());
+        }
+
+        // recommended for black list
+        result.add("\nYou might consider add this artists to BlackList");
+        for (RecommendedArtistsData recommendedArtist : recommendedBlackListArtists) {
+            result.add(recommendedArtist.format());
+        }
+
+        // recommended for black list unique (without white list artists)
+        result.add("\nYou might consider add this artists to Black or White list");
+        for (RecommendedArtistsData recommendedArtist : recommendedBlackWithoutWhiteListArtists) {
             result.add(recommendedArtist.format());
         }
 
