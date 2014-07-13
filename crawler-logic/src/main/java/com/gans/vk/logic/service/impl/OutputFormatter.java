@@ -39,6 +39,12 @@ public class OutputFormatter {
         int topArtistsCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
         result.addAll(top(topArtistsCount, aggregatedData, metrics));
 
+        // recommended for black list unique (without white list artists)
+        result.add("\nYou might consider add this artists to Black or White list");
+        for (RecommendedArtistsData recommendedArtist : recommendedBlackWithoutWhiteListArtists) {
+            result.add(recommendedArtist.format());
+        }
+
         // recommended white list artists
         result.add("\nRecommended artists for you are:");
         for (RecommendedArtistsData recommendedArtist : recommendedArtists) {
@@ -48,12 +54,6 @@ public class OutputFormatter {
         // recommended for black list
         result.add("\nYou might consider add this artists to BlackList");
         for (RecommendedArtistsData recommendedArtist : recommendedBlackListArtists) {
-            result.add(recommendedArtist.format());
-        }
-
-        // recommended for black list unique (without white list artists)
-        result.add("\nYou might consider add this artists to Black or White list");
-        for (RecommendedArtistsData recommendedArtist : recommendedBlackWithoutWhiteListArtists) {
             result.add(recommendedArtist.format());
         }
 

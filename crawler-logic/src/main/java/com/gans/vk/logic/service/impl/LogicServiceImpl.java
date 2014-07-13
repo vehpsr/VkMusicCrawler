@@ -1,5 +1,6 @@
 package com.gans.vk.logic.service.impl;
 
+import static com.gans.vk.context.SystemProperties.NumericProperty.CRAWLER_AUDIO_BOTTOM_ARTISTS_COUNT_OFFSET;
 import static com.gans.vk.context.SystemProperties.NumericProperty.CRAWLER_AUDIO_TOP_ARTISTS_COUNT;
 
 import java.util.*;
@@ -134,9 +135,11 @@ public class LogicServiceImpl implements LogicService {
 
     @Override
     public List<RecommendedArtistsData> recommendedBlackWithoutWhiteListArtists(List<Entry<String, Double>> aggregatedData) {
-        int artistCount = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        int size = SystemProperties.get(CRAWLER_AUDIO_TOP_ARTISTS_COUNT);
+        int offset = SystemProperties.get(CRAWLER_AUDIO_BOTTOM_ARTISTS_COUNT_OFFSET);
+        int startPosition = size + offset > aggregatedData.size() ? aggregatedData.size() : aggregatedData.size() - offset;
         List<String> ids = new ArrayList<String>();
-        for (ListIterator<Entry<String, Double>> iterator = aggregatedData.listIterator(aggregatedData.size()); iterator.hasPrevious() && artistCount > 0; artistCount--) {
+        for (ListIterator<Entry<String, Double>> iterator = aggregatedData.listIterator(startPosition); iterator.hasPrevious() && size > 0; size--) {
             ids.add(iterator.previous().getKey());
         }
         AudioLibrary lib = getBlackList();
@@ -144,7 +147,7 @@ public class LogicServiceImpl implements LogicService {
         return recommendedArtists(ids, lib);
     }
 
-    public List<RecommendedArtistsData> recommendedArtists(List<String> ids, AudioLibrary list) {
+    private List<RecommendedArtistsData> recommendedArtists(List<String> ids, AudioLibrary list) {
         AudioLibrary artistCount = new AudioLibrary("artistCount");
         AudioLibrary songsCount = new AudioLibrary("songsCount");
         for (String id : ids) {

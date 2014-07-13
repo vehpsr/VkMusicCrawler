@@ -48,7 +48,8 @@ public class SystemProperties {
         CRAWLER_DDOS_TIMEOUT_MIN("crawler.ddosTimeout.min"),
         CRAWLER_DDOS_TIMEOUT_RAND("crawler.ddosTimeout.randomization"),
         CRAWLER_ID_MIN_AUDIO_LIB_SIZE("crawler.id.minAudioLibrarySize"),
-        CRAWLER_AUDIO_TOP_ARTISTS_COUNT("crawler.audio.report.topArtistsCount");
+        CRAWLER_AUDIO_TOP_ARTISTS_COUNT("crawler.audio.report.topArtistsCount"),
+        CRAWLER_AUDIO_BOTTOM_ARTISTS_COUNT_OFFSET("crawler.audio.report.bottomArtistCountOffset");
 
         private String key;
 

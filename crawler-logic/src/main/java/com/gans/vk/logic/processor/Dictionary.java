@@ -52,8 +52,10 @@ public class Dictionary {
             float rating = whiteOccurrenceRate / (blackOccurrenceRate + whiteOccurrenceRate);
             if (rating > MAX_BASE_RATING) {
                 rating = MAX_BASE_RATING;
+                rating = (float) adjustOccurrence(rating, whiteCount - blackCount);
             } else if (rating < MIN_BASE_RATING) {
                 rating = MIN_BASE_RATING;
+                rating = (float) adjustOccurrence(rating, blackCount - whiteCount);
             }
             data.put(artist, rating);
         }
@@ -83,19 +85,10 @@ public class Dictionary {
         final int COUNT_LIMIT = 13;
         final float NEUTRAL_RATING = 0.5f;
 
-        int power;
-        if (count <= 0) {
-            power = 1;
-        } else if (count > COUNT_LIMIT) {
-            power = COUNT_LIMIT;
-        } else {
-            power = count;
-        }
-
         if (baseRating > NEUTRAL_RATING) {
-            return baseRating * Math.pow(1.06, power); // max increase in 2 times
+            return baseRating * Math.pow(1.05, Math.min(count, COUNT_LIMIT));
         } else if (baseRating < NEUTRAL_RATING) {
-            return baseRating * Math.pow(0.92, power); // max decrees in 3 times
+            return baseRating * Math.pow(0.94, count);
         }
         return NEUTRAL_RATING;
     }
