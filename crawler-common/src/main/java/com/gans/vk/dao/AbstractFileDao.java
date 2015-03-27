@@ -29,29 +29,15 @@ public class AbstractFileDao {
         }
 
         List<String> result = new ArrayList<String>();
-        BufferedReader reader = null;
-        try {
-            File file = createIfDontExist(path);
-            reader = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (StringUtils.isBlank(line)) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(getFile(path)))) {
+            for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                if (StringUtils.isBlank(line) || line.startsWith(COMMENT)) {
                     continue;
                 }
-                if (!line.startsWith(COMMENT)) {
-                    result.add(line.trim());
-                }
+                result.add(line.trim());
             }
         } catch (IOException e) {
             throw new IllegalStateException(MessageFormat.format("Exception while reading file: {0}", path), e);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    throw new IllegalStateException(MessageFormat.format("Exception while closing file: {0}", path), e);
-                }
-            }
         }
 
         if (ReadMode.UNIQUE.equals(readMode)) {
@@ -81,7 +67,7 @@ public class AbstractFileDao {
         return readFile(dir + fileName + EXTENSION, null);
     }
 
-    private File createIfDontExist(String path) throws IOException {
+    private File getFile(String path) throws IOException {
         File file = new File(path);
         file.getParentFile().mkdirs();
         if (!file.exists()) {
@@ -113,20 +99,12 @@ public class AbstractFileDao {
             return;
         }
 
-        PrintWriter pw = null;
-        try {
-            File file = createIfDontExist(path);
-            pw = new PrintWriter(new BufferedWriter(new FileWriter(file, true)));
-
+        try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(getFile(path), true)))) {
             for (String line : lines) {
                 pw.println(line);
             }
         } catch (IOException e) {
             throw new IllegalStateException(MessageFormat.format("Exception while writing to file: {0}", path), e);
-        } finally {
-            if (pw != null) {
-                pw.close();
-            }
         }
     }
 
